@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <svg height="851.10mm" viewBox="0.0 0.0 678.70 851.10" width="678.70mm" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:svg="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <!--
-TCGStorageBox - Divider tray - rows and dividers
+TCGStorageBox - One big box for storing cards from trading card games or other deckbuilding game. (The picture sample is one I made for aeon's end
 
 
 
@@ -15,6 +15,9 @@ There are 4 different sets of dividers rendered:
 * One single divider spanning across all columns
 
 You will likely need to cut each of the dividers you want multiple times.
+
+Some reworking is still to be made for allowing a different thickness for the inside wall
+For estetique improuvement we need to allow the possibilitty to made a "outside" box
 
 
 
@@ -26,7 +29,7 @@ Command line (remove spaces between dashes): boxes TCGStorageBox
 <rdf:RDF><cc:Work>
 <dc:title>Misc - TCGStorageBox</dc:title>
 <dc:source>boxes TCGStorageBox</dc:source>
-<dc:description>Divider tray - rows and dividers
+<dc:description>One big box for storing cards from trading card games or other deckbuilding game. (The picture sample is one I made for aeon's end
 
 
 Adding '0:' at the start of the sy parameter adds a slot at the very back. Adding ':0' at the end of sy adds a slot meeting the bottom at the very front. This is especially useful if slot angle is set above zero.
@@ -39,6 +42,9 @@ There are 4 different sets of dividers rendered:
 * One single divider spanning across all columns
 
 You will likely need to cut each of the dividers you want multiple times.
+
+Some reworking is still to be made for allowing a different thickness for the inside wall
+For estetique improuvement we need to allow the possibilitty to made a "outside" box
 
 
 Created with Boxes.py (https://boxes.hackerspace-bamberg.de/)

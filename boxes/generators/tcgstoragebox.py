@@ -42,7 +42,7 @@ class SlotSettings(edges.Settings):
 
 
 class TCGStorageBox(Boxes):
-    """Divider tray - rows and dividers"""
+    """One big box for storing cards from trading card games or other deckbuilding game. (The picture sample is one I made for aeon's end"""
 
     description = """
 Adding '0:' at the start of the sy parameter adds a slot at the very back. Adding ':0' at the end of sy adds a slot meeting the bottom at the very front. This is especially useful if slot angle is set above zero.
@@ -55,6 +55,9 @@ There are 4 different sets of dividers rendered:
 * One single divider spanning across all columns
 
 You will likely need to cut each of the dividers you want multiple times.
+
+Some reworking is still to be made for allowing a different thickness for the inside wall
+For estetique improuvement we need to allow the possibilitty to made a "outside" box
 """
 
     ui_group = "Misc"
