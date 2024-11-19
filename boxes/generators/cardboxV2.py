@@ -62,19 +62,25 @@ class FingerHoleEdge(edges.BaseEdge):
 class BoxBottomFrontEdge(edges.BaseEdge):
     char = 'b'
     def __call__(self, length, **kw):
+
+        y = self.boxdepth
+        sx = self.sx
+        bottom = max(self.settings.sx) / 3
+
         f = 0.4
         a1 = math.degrees(math.atan(f/(1-f)))
         a2 = 45 + a1
-        self.corner(-a1)
+        #self.corner(-a1)
+        self.edges["e"](self.thickness)
         for i, l in enumerate(self.settings.sx):
-            self.edges["e"](l* (f**2+(1-f)**2)**0.5)
-            self.corner(a2)
-            self.edges["f"](l*f*2**0.5)
-            if i < len(self.settings.sx)-1:
-                self.polyline(0, -45, self.thickness, -a1)
-            else:
-                self.corner(-45)
-
+            self.edges["f"](bottom)
+            self.edges["e"](bottom)
+            self.edges["f"](bottom)
+            #if i < len(self.settings.sx)-1:
+            #    self.polyline(0, -45, self.thickness, -a1)
+            #else:
+            #    self.corner(-45)
+        self.edges["e"](self.thickness)
     def margin(self) -> float:
         return max(self.settings.sx) * 0.4
 
@@ -253,34 +259,38 @@ Whole box (early version still missing grip rail on the lid):
             self.rectangularWall(x - t * .2, t, "fEeE", move="up", label="Lid Lip")
 
         with self.saved_context():
-            self.rectangularWall(x, y, "ffff", callback=[self.divider_bottom],
+            self.rectangularWall(x, y, "bfff", callback=[self.divider_bottom],
                                  move="right", label="Bottom")
-        self.rectangularWall(x, y*1.1, "eEEE", move="up only")
+        self.rectangularWall(x, y*1.3, "eEEE", move="up only")
+
         for i in range(len(sx) - 1):
             self.rectangularWall(h, y, "fAff", move="right", label="Divider")
 
         if self.add_lidtopper:
             self.rectangularWall(x, y - 2 * t, "eeee", move="right", label="Lid topper (optional)")
 
-        #self.rectangularWall(y, h, "FFFF", callback=[self.yHoles, ], label="right")
         #Ajout de cache avant, construit comme un rectangle avec un angle coupé,
+        #angle haut de la piece
         angle=50
+        #hauteur de la coupe
         hf=h*0.5
-        bottom=y/3
+        #"faux" bas, utilisé pour l'encoche,
+        falseBottom= max(self.sx) / 3
+        # vrai bas total
+        bottom=falseBottom+self.thickness
+
         hauteur=h+self.thickness
         panel = min((hauteur-hf)/math.cos(math.radians(90-angle)),
                     bottom/math.cos(math.radians(angle)))
-        top = bottom - panel * math.cos(math.radians(angle))
+        top = bottom - panel * math.cos(math.radians(angle))+self.thickness
         # ordre des coté, construit dans le sens trigonometrique.
-        borders = [bottom, 90, hf, 90 - angle, panel, angle, top,
+        borders = [self.thickness*2,0,falseBottom, 90, hf, 90 - angle, panel, angle, top,
                        90, h,0,self.thickness , 90]
 
-        self.polygonWall(borders, move="right",edge="FeeeFe")
-        borders = [bottom, 90,self.thickness,0,h,90,top,angle,panel,90-angle,hf,90]
+        self.polygonWall(borders, move="right",edge="eFeeeFe")
+        borders = [falseBottom,0,self.thickness*2, 90,self.thickness,0,h,90,top,angle,panel,90-angle,hf,90]
 
 
-        self.polygonWall(borders, move="right", edge="FeFeee")
+        self.polygonWall(borders, move="right", edge="FeeFeee")
 
-
-        #self.rectangularWall(y, h, "FFbF",  label="right")
 
