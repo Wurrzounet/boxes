@@ -369,14 +369,14 @@ class Boxes:
             "--labels", action="store", type=boolarg, default=True,
             help="label the parts (where available)")
         defaultgroup.add_argument(
-            "--reference", action="store", type=float, default=100.0,
+            "--reference", action="store", type=float, default=0.0,
             help="print reference rectangle with given length (in mm)(zero to disable) [\U0001F6C8](https://florianfesti.github.io/boxes/html/usermanual.html#reference)")
         defaultgroup.add_argument(
-            "--inner_corners", action="store", type=str, default="loop",
+            "--inner_corners", action="store", type=str, default="corner",
             choices=["loop", "corner", "backarc"],
             help="style for inner corners [\U0001F6C8](https://florianfesti.github.io/boxes/html/usermanual.html#inner-corners)")
         defaultgroup.add_argument(
-            "--burn", action="store", type=float, default=0.1,
+            "--burn", action="store", type=float, default=0.09,
             help='burn correction (in mm)(bigger values for tighter fit) [\U0001F6C8](https://florianfesti.github.io/boxes/html/usermanual.html#burn)')
 
     @contextmanager
