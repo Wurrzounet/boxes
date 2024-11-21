@@ -353,7 +353,7 @@ class Boxes:
             "--output", action="store", type=str, default="box.svg",
             help="name of resulting file")
         defaultgroup.add_argument(
-            "--format", action="store", type=str, default="svg",
+            "--format", action="store", type=str, default="lbrn2",
             choices=self.formats.getFormats(),
             help="format of resulting file [\U0001F6C8](https://florianfesti.github.io/boxes/html/usermanual.html#format)")
         defaultgroup.add_argument(
@@ -366,7 +366,7 @@ class Boxes:
             "--debug", action="store", type=boolarg, default=False,
             help="print surrounding boxes for some structures [\U0001F6C8](https://florianfesti.github.io/boxes/html/usermanual.html#debug)")
         defaultgroup.add_argument(
-            "--labels", action="store", type=boolarg, default=True,
+            "--labels", action="store", type=boolarg, default=False,
             help="label the parts (where available)")
         defaultgroup.add_argument(
             "--reference", action="store", type=float, default=0.0,
