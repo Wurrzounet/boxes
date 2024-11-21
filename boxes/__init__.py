@@ -359,7 +359,7 @@ class Boxes:
             "--output", action="store", type=str, default="box.svg",
             help="name of resulting file")
         defaultgroup.add_argument(
-            "--format", action="store", type=str, default="svg",
+            "--format", action="store", type=str, default="lbrn2",
             choices=self.formats.getFormats(),
             help="format of resulting file [\U0001F6C8](https://florianfesti.github.io/boxes/html/usermanual.html#format)")
         defaultgroup.add_argument(
@@ -372,17 +372,17 @@ class Boxes:
             "--debug", action="store", type=boolarg, default=False,
             help="print surrounding boxes for some structures [\U0001F6C8](https://florianfesti.github.io/boxes/html/usermanual.html#debug)")
         defaultgroup.add_argument(
-            "--labels", action="store", type=boolarg, default=True,
+            "--labels", action="store", type=boolarg, default=False,
             help="label the parts (where available)")
         defaultgroup.add_argument(
-            "--reference", action="store", type=float, default=100.0,
+            "--reference", action="store", type=float, default=0.0,
             help="print reference rectangle with given length (in mm)(zero to disable) [\U0001F6C8](https://florianfesti.github.io/boxes/html/usermanual.html#reference)")
         defaultgroup.add_argument(
-            "--inner_corners", action="store", type=str, default="loop",
+            "--inner_corners", action="store", type=str, default="corner",
             choices=["loop", "corner", "backarc"],
             help="style for inner corners [\U0001F6C8](https://florianfesti.github.io/boxes/html/usermanual.html#inner-corners)")
         defaultgroup.add_argument(
-            "--burn", action="store", type=float, default=0.1,
+            "--burn", action="store", type=float, default=0.09,
             help='burn correction (in mm)(bigger values for tighter fit) [\U0001F6C8](https://florianfesti.github.io/boxes/html/usermanual.html#burn)')
 
     @contextmanager
