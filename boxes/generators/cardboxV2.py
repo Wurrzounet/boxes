@@ -16,6 +16,8 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import math
 
+from docutils.nodes import label
+
 from boxes import BoolArg, Boxes, edges
 
 
@@ -71,16 +73,19 @@ class BoxBottomFrontEdge(edges.BaseEdge):
         a1 = math.degrees(math.atan(f/(1-f)))
         a2 = 45 + a1
         #self.corner(-a1)
-        self.edges["e"](self.thickness)
+        #self.edges["e"](self.thickness)
         for i, l in enumerate(self.settings.sx):
             self.edges["f"](bottom)
             self.edges["e"](bottom)
             self.edges["f"](bottom)
+            if i < len(self.settings.sx)-1:
+                self.edges["e"](self.thickness)
             #if i < len(self.settings.sx)-1:
             #    self.polyline(0, -45, self.thickness, -a1)
             #else:
             #    self.corner(-45)
-        self.edges["e"](self.thickness)
+
+        #self.edges["e"](self.thickness)
     def margin(self) -> float:
         return max(self.settings.sx) * 0.4
 
@@ -182,6 +187,13 @@ Whole box (early version still missing grip rail on the lid):
             pos += i + t
             self.fingerHolesAt(pos, 0, y, 90)
 
+    def divider_front(self):
+        t = self.thickness
+        y = self.boxhight
+
+        pos = 1.5* t + max(self.sx) / 3
+        self.fingerHolesAt(pos, 0, y+(t*2), 90)
+
     def render(self):
         self.addPart(BoxBottomFrontEdge(self, self))
         t = self.thickness if(self.add_lid) else 0
@@ -282,15 +294,16 @@ Whole box (early version still missing grip rail on the lid):
         hauteur=h+self.thickness
         panel = min((hauteur-hf)/math.cos(math.radians(90-angle)),
                     bottom/math.cos(math.radians(angle)))
-        top = bottom - panel * math.cos(math.radians(angle))+self.thickness
+        top = bottom - panel * math.cos(math.radians(angle))
         # ordre des coté, construit dans le sens trigonometrique.
-        borders = [self.thickness*2,0,falseBottom, 90, hf, 90 - angle, panel, angle, top,
+        borders = [self.thickness,0,falseBottom, 90, hf, 90 - angle, panel, angle, top,
                        90, h,0,self.thickness , 90]
 
-        self.polygonWall(borders, move="right",edge="eFeeeFe")
-        borders = [falseBottom,0,self.thickness*2, 90,self.thickness,0,h,90,top,angle,panel,90-angle,hf,90]
-
-
-        self.polygonWall(borders, move="right", edge="FeeFeee")
+        self.polygonWall(borders, move="right",edge="eFeeeFe", label='front left')
+        borders = [falseBottom,0,self.thickness, 90,self.thickness,0,h,90,top,angle,panel,90-angle,hf,90]
+        self.polygonWall(borders, move="right", edge="FeeFeee", label='front right')
+        borders = [self.thickness,0,falseBottom, 0, self.thickness,0, falseBottom,0,self.thickness, 90, hf,90 - angle,panel,angle,top*2+self.thickness,angle,panel,90-angle,hf,90]
+        for i in sx[:-1]:
+            self.polygonWall(borders, move="right", edge="eFeFeeeeee",callback=[self.divider_front],)
 
 
