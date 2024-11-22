@@ -77,9 +77,9 @@ class BoxBottomFrontEdge(edges.BaseEdge):
         for i, l in enumerate(self.settings.sx):
             self.edges["f"](bottom)
             self.corner(90)
-            self.edge(5)
+            self.edge(0)
             self.corner(-180, bottom/2)
-            self.edge(5)
+            self.edge(0)
             self.corner(90)
             #self.edges["e"](bottom)
             self.edges["f"](bottom)
@@ -238,9 +238,9 @@ Whole box (early version still missing grip rail on the lid):
         self.rectangularWall(y, h + t, "fFfF", move="up only")
 
         with self.saved_context():
-            self.rectangularWall(x, y, "bfff", callback=[self.divider_bottom],
+            self.rectangularWall(x, y, "ffbf", callback=[self.divider_bottom],
                                  move="right", label="Bottom")
-        self.rectangularWall(x, y*1.3, "eEEE", move="up only")
+        self.rectangularWall(x, y*1.1, "eEEE", move="up only")
 
         for i in range(len(sx) - 1):
             self.rectangularWall(h, y, "fAff", move="right", label="Divider")
