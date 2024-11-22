@@ -76,7 +76,12 @@ class BoxBottomFrontEdge(edges.BaseEdge):
         #self.edges["e"](self.thickness)
         for i, l in enumerate(self.settings.sx):
             self.edges["f"](bottom)
-            self.edges["e"](bottom)
+            self.corner(90)
+            self.edge(5)
+            self.corner(-180, bottom/2)
+            self.edge(5)
+            self.corner(90)
+            #self.edges["e"](bottom)
             self.edges["f"](bottom)
             if i < len(self.settings.sx)-1:
                 self.edges["e"](self.thickness)
@@ -180,7 +185,7 @@ Whole box (early version still missing grip rail on the lid):
         t = self.thickness
         y = self.boxhight
 
-        pos = 1.5* t + max(self.sx) / 3
+        pos = 0.5* t + max(self.sx) / 3
         self.fingerHolesAt(pos, 0, y+(t*2), 90)
 
     def render(self):
@@ -261,8 +266,8 @@ Whole box (early version still missing grip rail on the lid):
         self.polygonWall(borders, move="right",edge="eFeeeFe", label='front left')
         borders = [falseBottom,0,self.thickness, 90,self.thickness,0,h,90,top,angle,panel,90-angle,hf,90]
         self.polygonWall(borders, move="right", edge="FeeFeee", label='front right')
-        borders = [self.thickness,0,falseBottom, 0, self.thickness,0, falseBottom,0,self.thickness, 90, hf,90 - angle,panel,angle,top*2+self.thickness,angle,panel,90-angle,hf,90]
+        borders = [falseBottom, 0, self.thickness,0, falseBottom, 90, hf,90 - angle,panel,angle,top*2-self.thickness,angle,panel,90-angle,hf,90]
         for i in sx[:-1]:
-            self.polygonWall(borders, move="right", edge="eFeFeeeeee",callback=[self.divider_front],)
+            self.polygonWall(borders, move="right", edge="FeFeeeee",callback=[self.divider_front],)
 
 
