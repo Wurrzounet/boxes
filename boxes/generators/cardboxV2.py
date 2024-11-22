@@ -119,18 +119,7 @@ Whole box (early version still missing grip rail on the lid):
         self.argparser.add_argument(
             "--fingerhole_depth", action="store", type=float, default=20,
             help="Depth of cutout if fingerhole is set to 'custom'. Disabled otherwise.")
-        self.argparser.add_argument(
-            "--add_lidtopper", action="store", type=BoolArg(), default=False,
-            help="Add an additional lid topper for optical reasons and customisation"
-        )
-        self.argparser.add_argument(
-            "--add_lid", action="store", type=BoolArg(), default=False,
-            help="Add the topper"
-        )
-        self.argparser.add_argument(
-            "--add_side", action="store", type=BoolArg(), default=False,
-            help="Add the innder side"
-        )
+
 
     @property
     def fingerholedepth(self):
@@ -153,7 +142,7 @@ Whole box (early version still missing grip rail on the lid):
         return self.h
     @property
     def boxwidth(self):
-        return (len(self.sx) + (1 if (self.add_side) else -1)) * self.thickness + sum(self.sx)
+        return (len(self.sx)  -1) * self.thickness + sum(self.sx)
     @property
     def boxdepth(self):
         if self.outside:
@@ -166,7 +155,7 @@ Whole box (early version still missing grip rail on the lid):
         sx = self.sx
         y = self.boxdepth
 
-        pos = (0.5 if(self.add_side) else -0.5) * t
+        pos =  -0.5 * t
         for i in sx[:-1]:
             pos += i + t
             self.fingerHolesAt(pos, 0, y, 90)
@@ -182,7 +171,7 @@ Whole box (early version still missing grip rail on the lid):
         sx = self.sx
         y = self.boxhight
 
-        pos = (0.5 if(self.add_side) else -0.5) * t
+        pos =  -0.5 * t
         for i in sx[:-1]:
             pos += i + t
             self.fingerHolesAt(pos, 0, y, 90)
@@ -196,7 +185,7 @@ Whole box (early version still missing grip rail on the lid):
 
     def render(self):
         self.addPart(BoxBottomFrontEdge(self, self))
-        t = self.thickness if(self.add_lid) else 0
+        t = 0
 
         h = self.boxhight
         x = self.boxwidth
@@ -217,58 +206,31 @@ Whole box (early version still missing grip rail on the lid):
             self.rectangularWall(x, h + t , [
                 "F",
                 "F",
-                "E" if(self.add_lid) else "e",
+                "e",
                 "F",
             ],
                                  callback=[self.divider_back_and_front],
                                  move="right",
                                  label="Back")
-            self.rectangularWall(x, h +t, [
-                "F",
-                "F",
-                "a" if(self.add_lid) else "e",
-                "F",
-            ],
-                                 callback=[self.divider_back_and_front],
-                                 move="right",
-                                 label="Front")
+
         self.rectangularWall(x, h + t, "EEEE", move="up only")
 
         with self.saved_context():
             self.rectangularWall(y, h + t, [
                 "F",
                 "f",
-                "F" if(self.add_lid) else "e",
+                "e",
                 "f",
             ], move="right", label="Outer Side Left")
             self.rectangularWall(y, h + t,[
                 "F",
                 "f",
-                "F" if(self.add_lid) else "e",
+                "e",
                 "f",
             ]
 
             , move="right", label="Outer Side Right")
         self.rectangularWall(y, h + t, "fFfF", move="up only")
-
-        if self.add_side:
-            with self.saved_context():
-                self.rectangularWall(y, h, "Aeee", move="right", label="Inner Side Left")
-                self.rectangularWall(y, h, "Aeee", move="right", label="Inner Side Right")
-            self.rectangularWall(y, h, "eAee", move="up only")
-
-        if self.add_lid:
-            with self.saved_context():
-                self.rectangularWall(y, t, "eefe", move="right", label="Lip Left")
-                self.rectangularWall(y, t, "feee", move="right", label="Lip Right")
-            self.rectangularWall(y, t * 2, "efee", move="up only")
-
-            with self.saved_context():
-                self.rectangularWall(x - t * .2, y, "eeFe", move="right", label="Lid")
-
-
-            self.rectangularWall(x, y, "eEEE", move="up only")
-            self.rectangularWall(x - t * .2, t, "fEeE", move="up", label="Lid Lip")
 
         with self.saved_context():
             self.rectangularWall(x, y, "bfff", callback=[self.divider_bottom],
@@ -277,9 +239,6 @@ Whole box (early version still missing grip rail on the lid):
 
         for i in range(len(sx) - 1):
             self.rectangularWall(h, y, "fAff", move="right", label="Divider")
-
-        if self.add_lidtopper:
-            self.rectangularWall(x, y - 2 * t, "eeee", move="right", label="Lid topper (optional)")
 
         #Ajout de cache avant, construit comme un rectangle avec un angle coupé,
         #angle haut de la piece
