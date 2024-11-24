@@ -20,27 +20,6 @@ from docutils.nodes import label
 
 from boxes import BoolArg, Boxes, edges
 
-
-class InsetEdgeSettings(edges.Settings):
-    """Settings for InsetEdge"""
-    absolute_params = {
-        "thickness": 0,
-    }
-
-
-class InsetEdge(edges.BaseEdge):
-    """An edge with space to slide in a lid"""
-    def __call__(self, length, **kw):
-        t = self.settings.thickness
-        self.corner(90)
-        self.edge(t, tabs=2)
-        self.corner(-90)
-        self.edge(length, tabs=2)
-        self.corner(-90)
-        self.edge(t, tabs=2)
-        self.corner(90)
-
-
 class FingerHoleEdgeSettings(edges.Settings):
     """Settings for FingerHoleEdge"""
     absolute_params = {
@@ -122,7 +101,7 @@ Whole box (early version still missing grip rail on the lid):
             choices=['regular', 'deep', 'custom'],
             help="Depth of cutout to grab the cards")
         self.argparser.add_argument(
-            "--fingerhole_depth", action="store", type=float, default=20,
+            "--fingerhole_depth", action="store", type=float, default=10,
             help="Depth of cutout if fingerhole is set to 'custom'. Disabled otherwise.")
 
 
@@ -186,7 +165,7 @@ Whole box (early version still missing grip rail on the lid):
         y = self.boxhight
 
         pos = 0.5* t + max(self.sx) / 3
-        self.fingerHolesAt(pos, 0, y+(t*2), 90)
+        self.fingerHolesAt(pos, t, y, 90)
 
     def render(self):
         self.addPart(BoxBottomFrontEdge(self, self))
@@ -196,11 +175,6 @@ Whole box (early version still missing grip rail on the lid):
         x = self.boxwidth
         y = self.boxdepth
         sx = self.sx
-
-        s = InsetEdgeSettings(thickness=t)
-        p = InsetEdge(self, s)
-        p.char = "a"
-        self.addPart(p)
 
         s = FingerHoleEdgeSettings(thickness=t, wallheight=h, fingerholedepth=self.fingerholedepth)
         p = FingerHoleEdge(self, s)
