@@ -90,12 +90,35 @@ Details of the lid and rails
 Whole box (early version still missing grip rail on the lid):
 """
 
+    def generatesection(self,width):
+
+        result = []
+        for i in range(self.number_case):
+            result.append(float(width))
+        return result
+
+
     def __init__(self) -> None:
         Boxes.__init__(self)
 
         self.addSettingsArgs(edges.FingerJointSettings)
         self.buildArgParser(y=72, h=20, outside=False, sx="52*3")
 
+        self.argparser.add_argument(
+            "--case_size", action="store", type=str, default="custom",
+            choices=['tarot','poker', 'minipoker', 'custom'],
+            help="size of the card to store, y and x wont be used. Poker : 63.5*89 mm cards.  minipoker : 45*68mm cards")
+        self.argparser.add_argument(
+            "--card_position", action="store", type=str, default="vertical",
+            choices=['vertical', 'horizontal'],
+            help="position of the card in the case. Vertical mean that de short edge of the card will be in the bottom size. Not used for custom card size")
+        self.argparser.add_argument(
+            "--sleeved_cards", action="store", type=BoolArg(), default=True,
+            help="Add a small gap the case, to allow to put sleeved card in it (add 4mm for the width and 6 mm for the height of the card. Not used for custom card size"
+        )
+        self.argparser.add_argument(
+            "--number_case", action="store", type=int, default=3,
+            help="Number of case.")
         self.argparser.add_argument(
             "--fingerhole", action="store", type=str, default="custom",
             choices=['regular', 'deep', 'custom'],
@@ -131,7 +154,6 @@ Whole box (early version still missing grip rail on the lid):
     def boxdepth(self):
         if self.outside:
             return self.y - 2 * self.thickness
-
         return self.y
 
     def divider_bottom(self):
@@ -167,14 +189,41 @@ Whole box (early version still missing grip rail on the lid):
         pos = 0.5* t + max(self.sx) / 3
         self.fingerHolesAt(pos, t, y, 90)
 
-    def render(self):
-        self.addPart(BoxBottomFrontEdge(self, self))
-        t = 0
+    def getcardlenght(self,position):
+        cardlen = 0
+        # taille supplémentaire case en fonction de la presence ou non de sleeves
+        vert_up = 8 if(self.sleeved_cards) else 3
+        horiz_up = 4 if (self.sleeved_cards) else 3
+        match self.case_size:
+            case 'poker':
+                if self.card_position == position:
+                    cardlen=89 +vert_up
+                else:
+                    cardlen =63.5+horiz_up
+            case 'minipoker':
+                if self.card_position == position:
+                    cardlen=68+vert_up
+                else:
+                    cardlen =45+horiz_up
+            case 'tarot':
+                if self.card_position == position:
+                    cardlen = 120 + vert_up
+                else:
+                    cardlen = 70 + horiz_up
+        return cardlen
 
-        h = self.boxhight
-        x = self.boxwidth
+    def render(self):
+        if(self.case_size != 'custom'):
+            self.y = self.getcardlenght('vertical')
+            self.sx = self.generatesection(self.getcardlenght('horizontal'))
+
+        self.addPart(BoxBottomFrontEdge(self, self))
+
+        t = 0
         y = self.boxdepth
+        h = self.boxhight
         sx = self.sx
+        x = self.boxwidth
 
         s = FingerHoleEdgeSettings(thickness=t, wallheight=h, fingerholedepth=self.fingerholedepth)
         p = FingerHoleEdge(self, s)
@@ -188,9 +237,9 @@ Whole box (early version still missing grip rail on the lid):
                 "e",
                 "F",
             ],
-                                 callback=[self.divider_back_and_front],
-                                 move="right",
-                                 label="Back")
+             callback=[self.divider_back_and_front],
+             move="right",
+             label="Back")
 
         self.rectangularWall(x, h + t, "EEEE", move="up only")
 
