@@ -51,8 +51,6 @@ class BoxBottomFrontEdge(edges.BaseEdge):
         f = 0.4
         a1 = math.degrees(math.atan(f/(1-f)))
         a2 = 45 + a1
-        #self.corner(-a1)
-        #self.edges["e"](self.thickness)
         for i, l in enumerate(self.settings.sx):
             self.edges["f"](bottom)
             self.corner(90)
@@ -60,16 +58,10 @@ class BoxBottomFrontEdge(edges.BaseEdge):
             self.corner(-180, bottom/2)
             self.edge(0)
             self.corner(90)
-            #self.edges["e"](bottom)
             self.edges["f"](bottom)
             if i < len(self.settings.sx)-1:
                 self.edges["e"](self.thickness)
-            #if i < len(self.settings.sx)-1:
-            #    self.polyline(0, -45, self.thickness, -a1)
-            #else:
-            #    self.corner(-45)
 
-        #self.edges["e"](self.thickness)
     def margin(self) -> float:
         return max(self.settings.sx) * 0.4
 
@@ -119,6 +111,14 @@ Whole box (early version still missing grip rail on the lid):
         self.argparser.add_argument(
             "--number_case", action="store", type=int, default=3,
             help="Number of case.")
+        self.argparser.add_argument(
+            "--add_lid", action="store", type=BoolArg(), default=False,
+            help="Add a lid to help to keep cards in place."
+        )
+        self.argparser.add_argument(
+            "--lid_play", action="store", type=float, default=0.15,
+            help="Add a play between lid and insert. Multiple of thickness"
+        )
         self.argparser.add_argument(
             "--fingerhole", action="store", type=str, default="custom",
             choices=['regular', 'deep', 'custom'],
@@ -292,5 +292,14 @@ Whole box (early version still missing grip rail on the lid):
         borders = [falseBottom, 0, self.thickness,0, falseBottom, 90, hf,90 - angle,panel,angle,top*2-self.thickness,angle,panel,90-angle,hf,90]
         for i in sx[:-1]:
             self.polygonWall(borders, move="right", edge="FeFeeeee",callback=[self.divider_front],)
-
+        if (self.add_lid):
+            augment = t*(1+lid_play)
+            with self.saved_context():
+                self.rectangularWall(y+2*augment, h + augment, ["FfEf"], move="right", label="lid Side Left")
+                self.rectangularWall(y+2*augment, h + augment,["FfEf"], move="right", label="lid Side Right")
+                self.rectangularWall(x+2*augment, h + augment, ["FFEF"], move="right", label="lid Side front")
+                self.rectangularWall(x+2*augment, h + augment,["FFEF"], move="right", label="lid Side back")
+            self.rectangularWall(y, h + t, "fFfF", move="up only")
+            with self.saved_context():
+                self.rectangularWall(x+2*augment, y+2*augment, "ffff", move="right", label="lid top")
 
