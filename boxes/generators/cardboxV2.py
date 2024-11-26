@@ -292,13 +292,14 @@ Whole box (early version still missing grip rail on the lid):
         borders = [falseBottom, 0, self.thickness,0, falseBottom, 90, hf,90 - angle,panel,angle,top*2-self.thickness,angle,panel,90-angle,hf,90]
         for i in sx[:-1]:
             self.polygonWall(borders, move="right", edge="FeFeeeee",callback=[self.divider_front],)
+
         if (self.add_lid):
-            augment = t*(1+lid_play)
+            augment = self.thickness*(1+self.lid_play)
             with self.saved_context():
-                self.rectangularWall(y+2*augment, h + augment, ["FfEf"], move="right", label="lid Side Left")
-                self.rectangularWall(y+2*augment, h + augment,["FfEf"], move="right", label="lid Side Right")
-                self.rectangularWall(x+2*augment, h + augment, ["FFEF"], move="right", label="lid Side front")
-                self.rectangularWall(x+2*augment, h + augment,["FFEF"], move="right", label="lid Side back")
+                self.rectangularWall(y+2*augment, h + augment,"Ffef", move="right", label="lid Side Right")
+                self.rectangularWall(y+2*augment, h + augment, "Ffef", move="right", label="lid Side Left")
+                self.rectangularWall(x+2*augment, h + augment, "FFeF", move="right", label="lid Side front")
+                self.rectangularWall(x+2*augment, h + augment,"FFeF", move="right", label="lid Side back")
             self.rectangularWall(y, h + t, "fFfF", move="up only")
             with self.saved_context():
                 self.rectangularWall(x+2*augment, y+2*augment, "ffff", move="right", label="lid top")
