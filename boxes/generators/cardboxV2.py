@@ -269,27 +269,26 @@ Whole box (early version still missing grip rail on the lid):
             self.rectangularWall(h, y, "fAff", move="right", label="Divider")
 
         #Ajout de cache avant, construit comme un rectangle avec un angle coupé,
-        #angle haut de la piece
-        angle=50
-        #hauteur de la coupe
-        hf=h*0.5
-        #"faux" bas, utilisé pour l'encoche,
+        #la base fait 1/3 de la case, la largeur sera à rajouter lors de la constuction
         falseBottom= max(self.sx) / 3
-        # vrai bas total
-        bottom=falseBottom+self.thickness
+        #la largeur de la partie haute sera de 1/3 de la base, soit 1/9eme de la largeur de la case
+        top= falseBottom*0.3
+        # la hauteur avant l'angle sera de 1/3 de la hauteur total, on ajout l'epaisseur pour raison de construction
+        hf = h * 0.3 + self.thickness
+        #la partie coupé, on la calcul, on est sur un triangle rectangle. de base on est sur un rectangle de taille Hauteur x 1/3 case.
+        #on a déjà coupé 1/3 de la hauteur et de la largeur, donc la coupe sera l'hypothénus du reste qui formera un triangle rectangle.
+        panel =math.sqrt( (h*0.7)*(h*0.7)+(falseBottom*0.7)*(falseBottom*0.7))
+        #on calcul maintenant l'angle en utilisant les règle du cosinus. adjacent/hypotenus = cos(angle)
+        angle = math. degrees(math.acos(falseBottom*0.7/panel))
 
-        hauteur=h+self.thickness
-        panel = min((hauteur-hf)/math.cos(math.radians(90-angle)),
-                    bottom/math.cos(math.radians(angle)))
-        top = bottom - panel * math.cos(math.radians(angle))
         # ordre des coté, construit dans le sens trigonometrique.
-        borders = [self.thickness,0,falseBottom, 90, hf, 90 - angle, panel, angle, top,
+        borders = [self.thickness,0,falseBottom, 90, hf, 90 - angle, panel, angle, top+self.thickness,
                        90, h,0,self.thickness , 90]
 
         self.polygonWall(borders, move="right",edge="eFeeeFe", label='front left')
-        borders = [falseBottom,0,self.thickness, 90,self.thickness,0,h,90,top,angle,panel,90-angle,hf,90]
+        borders = [falseBottom,0,self.thickness, 90,self.thickness,0,h,90,top+self.thickness,angle,panel,90-angle,hf,90]
         self.polygonWall(borders, move="right", edge="FeeFeee", label='front right')
-        borders = [falseBottom, 0, self.thickness,0, falseBottom, 90, hf,90 - angle,panel,angle,top*2-self.thickness,angle,panel,90-angle,hf,90]
+        borders = [falseBottom, 0, self.thickness,0, falseBottom, 90, hf,90 - angle,panel,angle,top*2+self.thickness,angle,panel,90-angle,hf,90]
         for i in sx[:-1]:
             self.polygonWall(borders, move="right", edge="FeFeeeee",callback=[self.divider_front],)
 
