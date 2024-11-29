@@ -43,14 +43,7 @@ class FingerHoleEdge(edges.BaseEdge):
 class BoxBottomFrontEdge(edges.BaseEdge):
     char = 'b'
     def __call__(self, length, **kw):
-
-        y = self.boxdepth
-        sx = self.sx
         bottom = max(self.settings.sx) / 3
-
-        f = 0.4
-        a1 = math.degrees(math.atan(f/(1-f)))
-        a2 = 45 + a1
         for i, l in enumerate(self.settings.sx):
             self.edges["f"](bottom)
             self.corner(90)
@@ -61,9 +54,6 @@ class BoxBottomFrontEdge(edges.BaseEdge):
             self.edges["f"](bottom)
             if i < len(self.settings.sx)-1:
                 self.edges["e"](self.thickness)
-
-    def margin(self) -> float:
-        return max(self.settings.sx) * 0.4
 
 class CardBoxV2(Boxes):
     """Box for storage of playing cards, with versatile options"""
@@ -143,9 +133,9 @@ Whole box (early version still missing grip rail on the lid):
 
     #inner dimensions of surrounding box (disregarding inlays)
     @property
-    def boxhight(self):
+    def boxheight(self):
         if self.outside:
-            return self.h - 3 * self.thickness
+            return self.h -  self.thickness
         return self.h
     @property
     def boxwidth(self):
@@ -166,16 +156,10 @@ Whole box (early version still missing grip rail on the lid):
             pos += i + t
             self.fingerHolesAt(pos, 0, y, 90)
 
-    def yHoles(self):
-        posy = -0.5 * self.thickness
-        for y in reversed(self.sx[1:]):
-            posy += y + self.thickness
-            self.fingerHolesAt(posy, 0, self.boxhight)
-
     def divider_back_and_front(self):
         t = self.thickness
         sx = self.sx
-        y = self.boxhight
+        y = self.boxheight
 
         pos =  -0.5 * t
         for i in sx[:-1]:
@@ -184,7 +168,7 @@ Whole box (early version still missing grip rail on the lid):
 
     def divider_front(self):
         t = self.thickness
-        y = self.boxhight
+        y = self.boxheight
 
         pos = 0.5* t + max(self.sx) / 3
         self.fingerHolesAt(pos, t, y, 90)
@@ -221,7 +205,7 @@ Whole box (early version still missing grip rail on the lid):
 
         t = 0
         y = self.boxdepth
-        h = self.boxhight
+        h = self.boxheight
         sx = self.sx
         x = self.boxwidth
 
@@ -231,33 +215,14 @@ Whole box (early version still missing grip rail on the lid):
         self.addPart(p)
 
         with self.saved_context():
-            self.rectangularWall(x, h + t , [
-                "F",
-                "F",
-                "e",
-                "F",
-            ],
-             callback=[self.divider_back_and_front],
-             move="right",
-             label="Back")
+            self.rectangularWall(x, h + t , "FFeF",callback=[self.divider_back_and_front],
+             move="right", label="Back")
 
         self.rectangularWall(x, h + t, "EEEE", move="up only")
 
         with self.saved_context():
-            self.rectangularWall(y, h + t, [
-                "F",
-                "f",
-                "e",
-                "f",
-            ], move="right", label="Outer Side Left")
-            self.rectangularWall(y, h + t,[
-                "F",
-                "f",
-                "e",
-                "f",
-            ]
-
-            , move="right", label="Outer Side Right")
+            self.rectangularWall(y, h + t, "Ffef", move="right", label="Outer Side Left")
+            self.rectangularWall(y, h + t, "Ffef", move="right", label="Outer Side Right")
         self.rectangularWall(y, h + t, "fFfF", move="up only")
 
         with self.saved_context():
