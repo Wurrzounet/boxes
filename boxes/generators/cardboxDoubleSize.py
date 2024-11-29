@@ -44,28 +44,16 @@ class BoxBottomFrontEdge(edges.BaseEdge):
     char = 'b'
     def __call__(self, length, **kw):
 
-        y = self.boxdepth
-        sx = self.sx
-        bottom = max(self.settings.sx) / 3
+        bottom = self.x/3
+        self.edges["f"](bottom)
+        self.corner(90)
+        self.edge(0)
+        self.corner(-180, bottom/2)
+        self.edge(0)
+        self.corner(90)
+        self.edges["f"](bottom)
 
-        f = 0.4
-        a1 = math.degrees(math.atan(f/(1-f)))
-        a2 = 45 + a1
-        for i, l in enumerate(self.settings.sx):
-            self.edges["f"](bottom)
-            self.corner(90)
-            self.edge(0)
-            self.corner(-180, bottom/2)
-            self.edge(0)
-            self.corner(90)
-            self.edges["f"](bottom)
-            if i < len(self.settings.sx)-1:
-                self.edges["e"](self.thickness)
-
-    def margin(self) -> float:
-        return max(self.settings.sx) * 0.4
-
-class CardBoxV2(Boxes):
+class CardBoxDoubleSize(Boxes):
     """Box for storage of playing cards, with versatile options"""
     ui_group = "Box"
 
@@ -82,35 +70,30 @@ Details of the lid and rails
 Whole box (early version still missing grip rail on the lid):
 """
 
-    def generatesection(self,width):
-
-        result = []
-        for i in range(self.number_case):
-            result.append(float(width))
-        return result
-
-
     def __init__(self) -> None:
         Boxes.__init__(self)
 
         self.addSettingsArgs(edges.FingerJointSettings)
-        self.buildArgParser(y=72, h=20, outside=False, sx="52*3")
+        self.buildArgParser(y=72,x=50, h=20)
 
         self.argparser.add_argument(
-            "--case_size", action="store", type=str, default="custom",
+            "--first_case_size", action="store", type=str, default="custom",
             choices=['tarot','poker', 'minipoker', 'custom'],
             help="size of the card to store, y and x wont be used. Poker : 63.5*89 mm cards.  minipoker : 45*68mm cards")
         self.argparser.add_argument(
-            "--card_position", action="store", type=str, default="vertical",
-            choices=['vertical', 'horizontal'],
-            help="position of the card in the case. Vertical mean that de short edge of the card will be in the bottom size. Not used for custom card size")
+            "--first_stage", action="store", type=float, default=0.15,
+            help="Height of the first stage, multiple of height"
+        )
+        self.argparser.add_argument(
+            "--second_case_size", action="store", type=str, default="custom",
+            choices=['tarot', 'poker', 'minipoker', 'custom'],
+            help="size of the card to store, y and x wont be used. Poker : 63.5*89 mm cards.  minipoker : 45*68mm cards")
+
         self.argparser.add_argument(
             "--sleeved_cards", action="store", type=BoolArg(), default=True,
             help="Add a small gap the case, to allow to put sleeved card in it (add 4mm for the width and 6 mm for the height of the card. Not used for custom card size"
         )
-        self.argparser.add_argument(
-            "--number_case", action="store", type=int, default=3,
-            help="Number of case.")
+
         self.argparser.add_argument(
             "--add_lid", action="store", type=BoolArg(), default=False,
             help="Add a lid to help to keep cards in place."
@@ -119,158 +102,134 @@ Whole box (early version still missing grip rail on the lid):
             "--lid_play", action="store", type=float, default=0.15,
             help="Add a play between lid and insert. Multiple of thickness"
         )
-        self.argparser.add_argument(
-            "--fingerhole", action="store", type=str, default="custom",
-            choices=['regular', 'deep', 'custom'],
-            help="Depth of cutout to grab the cards")
-        self.argparser.add_argument(
-            "--fingerhole_depth", action="store", type=float, default=10,
-            help="Depth of cutout if fingerhole is set to 'custom'. Disabled otherwise.")
-
 
     @property
-    def fingerholedepth(self):
-        if self.fingerhole == 'custom':
-            return self.fingerhole_depth
-        elif self.fingerhole == 'regular':
-            a = self.h/4
-            if a < 35:
-                return a
-            else:
-                return 35
-        elif self.fingerhole == 'deep':
-            return self.h-self.thickness-10
+    def widthFirstCard(self):
+        cardlen = 0
+        # taille supplémentaire case en fonction de la presence ou non de sleeves
+        vert_up = 8 if (self.sleeved_cards) else 3
+        match self.first_case_size:
+            case 'poker':
+                cardlen = 89 + vert_up
+            case 'minipoker':
+                cardlen = 68 + vert_up
+            case 'tarot':
+                cardlen = 120 + vert_up
+            case 'custom':
+                cardlen = self.x
+        return (cardlen)
+
+    @property
+    def widthSecondCard(self):
+        cardlen = 0
+        # taille supplémentaire case en fonction de la presence ou non de sleeves
+        vert_up = 8 if (self.sleeved_cards) else 3
+        match self.second_case_size:
+            case 'poker':
+                cardlen = 89 + vert_up
+            case 'minipoker':
+                cardlen = 68 + vert_up
+            case 'tarot':
+                cardlen = 120 + vert_up
+            case 'custom':
+                cardlen = self.x
+        return (cardlen)
+
+    @property
+    def lenghtFirstCard(self):
+        cardlen = 0
+        # taille supplémentaire case en fonction de la presence ou non de sleeves
+        horiz_up = 4 if (self.sleeved_cards) else 3
+        match self.first_case_size:
+            case 'poker':
+                cardlen = 63.5 + horiz_up
+            case 'minipoker':
+                cardlen = 45 + horiz_up
+            case 'tarot':
+                cardlen = 70 + horiz_up
+        return cardlen
+
+    @property
+    def lenghtSecondCard(self):
+        cardlen = 0
+        # taille supplémentaire case en fonction de la presence ou non de sleeves
+        horiz_up = 4 if (self.sleeved_cards) else 3
+        match self.second_case_size:
+            case 'poker':
+                cardlen = 63.5 + horiz_up
+            case 'minipoker':
+                cardlen = 45 + horiz_up
+            case 'tarot':
+                cardlen = 70 + horiz_up
+        return cardlen
 
     #inner dimensions of surrounding box (disregarding inlays)
     @property
-    def boxhight(self):
-        if self.outside:
-            return self.h - 3 * self.thickness
+    def boxheight(self):
         return self.h
     @property
     def boxwidth(self):
-        return (len(self.sx)  -1) * self.thickness + sum(self.sx)
+        return (self.x)
     @property
     def boxdepth(self):
-        if self.outside:
-            return self.y - 2 * self.thickness
         return self.y
 
     def divider_bottom(self):
         t = self.thickness
-        sx = self.sx
         y = self.boxdepth
-
-        pos =  -0.5 * t
-        for i in sx[:-1]:
-            pos += i + t
-            self.fingerHolesAt(pos, 0, y, 90)
-
-    def yHoles(self):
-        posy = -0.5 * self.thickness
-        for y in reversed(self.sx[1:]):
-            posy += y + self.thickness
-            self.fingerHolesAt(posy, 0, self.boxhight)
+        pos =  0.5 * t
+        #self.fingerHolesAt(pos, 0, y, 90)
 
     def divider_back_and_front(self):
         t = self.thickness
-        sx = self.sx
-        y = self.boxhight
-
-        pos =  -0.5 * t
-        for i in sx[:-1]:
-            pos += i + t
-            self.fingerHolesAt(pos, 0, y, 90)
-
-    def divider_front(self):
-        t = self.thickness
-        y = self.boxhight
-
-        pos = 0.5* t + max(self.sx) / 3
-        self.fingerHolesAt(pos, t, y, 90)
+        y = self.boxheight
+        pos =  0.5 * t
+        #self.fingerHolesAt(pos, 0, y, 90)
 
     def getcardlenght(self,position):
-        cardlen = 0
-        # taille supplémentaire case en fonction de la presence ou non de sleeves
-        vert_up = 8 if(self.sleeved_cards) else 3
-        horiz_up = 4 if (self.sleeved_cards) else 3
-        match self.case_size:
-            case 'poker':
-                if self.card_position == position:
-                    cardlen=89 +vert_up
-                else:
-                    cardlen =63.5+horiz_up
-            case 'minipoker':
-                if self.card_position == position:
-                    cardlen=68+vert_up
-                else:
-                    cardlen =45+horiz_up
-            case 'tarot':
-                if self.card_position == position:
-                    cardlen = 120 + vert_up
-                else:
-                    cardlen = 70 + horiz_up
-        return cardlen
+        if position == 'horizontal' :
+            return max(self.widthFirstCard,self.widthSecondCard)
+        else:
+            return max(self.lenghtSecondCard, self.lenghtSecondCard)
+
 
     def render(self):
-        if(self.case_size != 'custom'):
-            self.y = self.getcardlenght('vertical')
-            self.sx = self.generatesection(self.getcardlenght('horizontal'))
+        #if(self.case_size != 'custom'):
+        self.y = self.getcardlenght('vertical')
+        self.x = self.getcardlenght('horizontal')
 
         self.addPart(BoxBottomFrontEdge(self, self))
 
         t = 0
         y = self.boxdepth
-        h = self.boxhight
-        sx = self.sx
+        h = self.boxheight
         x = self.boxwidth
 
-        s = FingerHoleEdgeSettings(thickness=t, wallheight=h, fingerholedepth=self.fingerholedepth)
-        p = FingerHoleEdge(self, s)
-        p.char = "A"
-        self.addPart(p)
+        #s = FingerHoleEdgeSettings(thickness=t, wallheight=h, fingerholedepth=self.fingerholedepth)
+        #p = FingerHoleEdge(self, s)
+        #p.char = "A"
+        #self.addPart(p)
 
         with self.saved_context():
-            self.rectangularWall(x, h + t , [
-                "F",
-                "F",
-                "e",
-                "F",
-            ],
-             callback=[self.divider_back_and_front],
-             move="right",
-             label="Back")
+            self.rectangularWall(x, h + t , "FFeF",callback=[self.divider_back_and_front],
+             move="right", label="Back")
 
         self.rectangularWall(x, h + t, "EEEE", move="up only")
 
         with self.saved_context():
-            self.rectangularWall(y, h + t, [
-                "F",
-                "f",
-                "e",
-                "f",
-            ], move="right", label="Outer Side Left")
-            self.rectangularWall(y, h + t,[
-                "F",
-                "f",
-                "e",
-                "f",
-            ]
+            self.rectangularWall(y, h + t, "Ffef", move="right", label="Outer Side Left")
+            self.rectangularWall(y, h + t,"Ffef", move="right", label="Outer Side Right")
 
-            , move="right", label="Outer Side Right")
         self.rectangularWall(y, h + t, "fFfF", move="up only")
 
         with self.saved_context():
-            self.rectangularWall(x, y, "ffbf", callback=[self.divider_bottom],
-                                 move="right", label="Bottom")
+            self.rectangularWall(x, y, "ffbf", callback=[self.divider_bottom], move="right", label="Bottom")
         self.rectangularWall(x, y*1.1, "eEEE", move="up only")
 
-        for i in range(len(sx) - 1):
-            self.rectangularWall(h, y, "fAff", move="right", label="Divider")
 
         #Ajout de cache avant, construit comme un rectangle avec un angle coupé,
         #la base fait 1/3 de la case, la largeur sera à rajouter lors de la constuction
-        falseBottom= max(self.sx) / 3
+        falseBottom= self.boxwidth / 3
         #la largeur de la partie haute sera de 1/3 de la base, soit 1/9eme de la largeur de la case
         top= falseBottom*0.3
         # la hauteur avant l'angle sera de 1/3 de la hauteur total, on ajout l'epaisseur pour raison de construction
@@ -289,8 +248,7 @@ Whole box (early version still missing grip rail on the lid):
         borders = [falseBottom,0,self.thickness, 90,self.thickness,0,h,90,top+self.thickness,angle,panel,90-angle,hf,90]
         self.polygonWall(borders, move="right", edge="FeeFeee", label='front right')
         borders = [falseBottom, 0, self.thickness,0, falseBottom, 90, hf,90 - angle,panel,angle,top*2+self.thickness,angle,panel,90-angle,hf,90]
-        for i in sx[:-1]:
-            self.polygonWall(borders, move="right", edge="FeFeeeee",callback=[self.divider_front],)
+
 
         if (self.add_lid):
             augment = self.thickness*(1+self.lid_play)
