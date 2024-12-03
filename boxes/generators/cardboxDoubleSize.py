@@ -15,6 +15,7 @@
 #   You should have received a copy of the GNU General Public License
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import math
+from gc import callbacks
 
 from docutils.nodes import label
 
@@ -74,18 +75,18 @@ Whole box (early version still missing grip rail on the lid):
         Boxes.__init__(self)
 
         self.addSettingsArgs(edges.FingerJointSettings)
-        self.buildArgParser(y=72,x=50, h=20)
+        self.buildArgParser(y=72,x=50, h=40)
 
         self.argparser.add_argument(
-            "--first_case_size", action="store", type=str, default="custom",
+            "--first_case_size", action="store", type=str, default="tarot",
             choices=['tarot','poker', 'minipoker', 'custom'],
             help="size of the card to store, y and x wont be used. Poker : 63.5*89 mm cards.  minipoker : 45*68mm cards")
         self.argparser.add_argument(
-            "--first_stage", action="store", type=float, default=0.15,
+            "--first_stage", action="store", type=float, default=0.5,
             help="Height of the first stage, multiple of height"
         )
         self.argparser.add_argument(
-            "--second_case_size", action="store", type=str, default="custom",
+            "--second_case_size", action="store", type=str, default="poker",
             choices=['tarot', 'poker', 'minipoker', 'custom'],
             help="size of the card to store, y and x wont be used. Poker : 63.5*89 mm cards.  minipoker : 45*68mm cards")
 
@@ -184,14 +185,39 @@ Whole box (early version still missing grip rail on the lid):
         t = self.thickness
         y = self.boxheight
         pos =  0.5 * t
-        #self.fingerHolesAt(pos, 0, y, 90)
+        self.fingerHolesAt(pos, 0, y, 90)
+
+    def divider_front_left(self):
+        t = self.thickness
+        y = self.heightFirstStar
+        w= self.horizontalDif/2
+        pos =  1.5 * t+w
+        self.fingerHolesAt(pos, t, y, 90)
+        pos = 0.5 * t + y
+        self.fingerHolesAt(t, pos, w, 0)
+
+    def divider_front_right(self):
+        t = self.thickness
+        y = self.heightFirstStar
+        w= self.horizontalDif/2
+        pos =  (self.boxwidth / 3)-(0.5 * t+w)
+        self.fingerHolesAt(pos, t, y, 90)
+        posx = (self.boxwidth / 3)-w
+        pos = 0.5 * t + y
+        self.fingerHolesAt(posx, pos, w, 0)
 
     def getcardlenght(self,position):
         if position == 'horizontal' :
             return max(self.widthFirstCard,self.widthSecondCard)
         else:
-            return max(self.lenghtSecondCard, self.lenghtSecondCard)
+            return max(self.lenghtSecondCard, self.lenghtFirstCard)
+    @property
+    def horizontalDif(self):
+        return abs(self.widthFirstCard-self.widthSecondCard)
 
+    @property
+    def heightFirstStar(self):
+        return self.boxheight*self.first_stage
 
     def render(self):
         #if(self.case_size != 'custom'):
@@ -215,6 +241,19 @@ Whole box (early version still missing grip rail on the lid):
              move="right", label="Back")
 
         self.rectangularWall(x, h + t, "EEEE", move="up only")
+        diff = self.horizontalDif/2
+        #self.rectangularWall(diff, h + t, "Ffef", move="right", label="Outer Side Left")
+        if (diff > t):
+            with self.saved_context():
+                self.rectangularWall(y, diff, "ffff", move="right", label="premier dessus")
+                self.rectangularWall(y, diff, "ffff", move="right", label="deuxieme dessus")
+            self.rectangularWall(x, diff*1.1, "EEEE", move="up only")
+
+        if (self.heightFirstStar > t):
+            with self.saved_context():
+                self.rectangularWall(y, self.heightFirstStar, "ffFf", move="right", label="premier coté Etage")
+                self.rectangularWall(y, self.heightFirstStar, "ffFf", move="right", label="deuxieme coté Etage")
+            self.rectangularWall(x, self.heightFirstStar, "EEEE", move="up only")
 
         with self.saved_context():
             self.rectangularWall(y, h + t, "Ffef", move="right", label="Outer Side Left")
@@ -241,13 +280,11 @@ Whole box (early version still missing grip rail on the lid):
         angle = math. degrees(math.acos(falseBottom*0.7/panel))
 
         # ordre des coté, construit dans le sens trigonometrique.
-        borders = [self.thickness,0,falseBottom, 90, hf, 90 - angle, panel, angle, top+self.thickness,
-                       90, h,0,self.thickness , 90]
-
-        self.polygonWall(borders, move="right",edge="eFeeeFe", label='front left')
+        borders = [self.thickness,0,falseBottom, 90, hf, 90 - angle, panel, angle, top+self.thickness, 90, h,0,self.thickness , 90]
+        self.polygonWall(borders, move="right",edge="eFeeeFe", label='front left',callback=[self.divider_front_left])
         borders = [falseBottom,0,self.thickness, 90,self.thickness,0,h,90,top+self.thickness,angle,panel,90-angle,hf,90]
-        self.polygonWall(borders, move="right", edge="FeeFeee", label='front right')
-        borders = [falseBottom, 0, self.thickness,0, falseBottom, 90, hf,90 - angle,panel,angle,top*2+self.thickness,angle,panel,90-angle,hf,90]
+        self.polygonWall(borders, move="right", edge="FeeFeee", label='front right',callback=[self.divider_front_right])
+        #borders = [falseBottom, 0, self.thickness,0, falseBottom, 90, hf,90 - angle,panel,angle,top*2+self.thickness,angle,panel,90-angle,hf,90]
 
 
         if (self.add_lid):
