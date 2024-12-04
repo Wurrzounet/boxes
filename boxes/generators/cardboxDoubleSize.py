@@ -178,8 +178,10 @@ Whole box (early version still missing grip rail on the lid):
     def divider_bottom(self):
         t = self.thickness
         y = self.boxdepth
-        pos =  0.5 * t
-        #self.fingerHolesAt(pos, 0, y, 90)
+        pos =  0.5 * t+self.horizontalDif/2
+        self.fingerHolesAt(pos, 0, y, 90)
+        pos = self.boxwidth-pos
+        self.fingerHolesAt(pos, 0, y, 90)
 
     def divider_back(self):
         self.divider_front_left_c(0)
@@ -209,6 +211,11 @@ Whole box (early version still missing grip rail on the lid):
         posx = (lengPiece)-w
         pos = (thicRatio+0.5) * t + y
         self.fingerHolesAt(posx, pos, w, 0)
+
+    def divider_side(self):
+        t = self.thickness
+        y = self.heightFirstStar+0.5*t
+        self.fingerHolesAt(0, y, self.boxdepth, 0)
 
     def getcardlenght(self,position):
         if position == 'horizontal' :
@@ -260,8 +267,8 @@ Whole box (early version still missing grip rail on the lid):
             self.rectangularWall(x, self.heightFirstStar, "EEEE", move="up only")
 
         with self.saved_context():
-            self.rectangularWall(y, h + t, "Ffef", move="right", label="Outer Side Left")
-            self.rectangularWall(y, h + t,"Ffef", move="right", label="Outer Side Right")
+            self.rectangularWall(y, h + t, "Ffef", move="right", label="Outer Side Left", callback=[self.divider_side])
+            self.rectangularWall(y, h + t,"Ffef", move="right", label="Outer Side Right", callback=[self.divider_side])
 
         self.rectangularWall(y, h + t, "fFfF", move="up only")
 
