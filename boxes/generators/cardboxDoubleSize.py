@@ -45,7 +45,7 @@ class BoxBottomFrontEdge(edges.BaseEdge):
     char = 'b'
     def __call__(self, length, **kw):
 
-        bottom = self.x/3
+        bottom = self.boxwidth/3
         self.edges["f"](bottom)
         self.corner(90)
         self.edge(0)
@@ -73,22 +73,43 @@ Whole box (early version still missing grip rail on the lid):
 
     def __init__(self) -> None:
         Boxes.__init__(self)
-
         self.addSettingsArgs(edges.FingerJointSettings)
-        self.buildArgParser(y=72,x=50, h=40)
+        self.buildArgParser(y=720,x=500, h=40)
 
         self.argparser.add_argument(
             "--first_case_size", action="store", type=str, default="tarot",
             choices=['tarot','poker', 'minipoker', 'custom'],
             help="size of the card to store, y and x wont be used. Poker : 63.5*89 mm cards.  minipoker : 45*68mm cards")
+
         self.argparser.add_argument(
             "--first_stage", action="store", type=float, default=0.5,
             help="Height of the first stage, multiple of height"
         )
+
+        self.argparser.add_argument(
+            "--first_width", action="store", type=float, default=65,
+            help="width of the first card, only for custom card"
+        )
+
+        self.argparser.add_argument(
+            "--first_length", action="store", type=float, default=100,
+            help="length of the first card, only for custom card"
+        )
+
         self.argparser.add_argument(
             "--second_case_size", action="store", type=str, default="poker",
             choices=['tarot', 'poker', 'minipoker', 'custom'],
             help="size of the card to store, y and x wont be used. Poker : 63.5*89 mm cards.  minipoker : 45*68mm cards")
+
+        self.argparser.add_argument(
+            "--second_width", action="store", type=float, default=60,
+            help="width of the second card, only for custom card"
+        )
+
+        self.argparser.add_argument(
+            "--second_length", action="store", type=float, default=115,
+            help="length of the second card, only for custom card"
+        )
 
         self.argparser.add_argument(
             "--sleeved_cards", action="store", type=BoolArg(), default=True,
@@ -117,7 +138,7 @@ Whole box (early version still missing grip rail on the lid):
             case 'tarot':
                 cardlen = 120 + vert_up
             case 'custom':
-                cardlen = self.x
+                cardlen = self.first_length
         return (cardlen)
 
     @property
@@ -133,7 +154,7 @@ Whole box (early version still missing grip rail on the lid):
             case 'tarot':
                 cardlen = 120 + vert_up
             case 'custom':
-                cardlen = self.x
+                cardlen = self.second_length
         return (cardlen)
 
     @property
@@ -148,6 +169,8 @@ Whole box (early version still missing grip rail on the lid):
                 cardlen = 45 + horiz_up
             case 'tarot':
                 cardlen = 70 + horiz_up
+            case 'custom':
+                cardlen = self.first_width
         return cardlen
 
     @property
@@ -162,18 +185,15 @@ Whole box (early version still missing grip rail on the lid):
                 cardlen = 45 + horiz_up
             case 'tarot':
                 cardlen = 70 + horiz_up
+            case 'custom':
+                cardlen = self.second_width
         return cardlen
 
     #inner dimensions of surrounding box (disregarding inlays)
     @property
     def boxheight(self):
         return self.h
-    @property
-    def boxwidth(self):
-        return (self.x)
-    @property
-    def boxdepth(self):
-        return self.y
+
 
     def divider_bottom(self):
         t = self.thickness
@@ -230,10 +250,18 @@ Whole box (early version still missing grip rail on the lid):
     def heightFirstStar(self):
         return self.boxheight*self.first_stage
 
+    @property
+    def needTop(self):
+        return self.horizontalDif/2>self.thickness
+
+    @property
+    def needStage(self):
+        return (self.heightFirstStar > self.thickness)
+
     def render(self):
         #if(self.case_size != 'custom'):
-        self.y = self.getcardlenght('vertical')
-        self.x = self.getcardlenght('horizontal')
+        self.boxdepth = self.getcardlenght('vertical')
+        self.boxwidth = self.getcardlenght('horizontal')
 
         self.addPart(BoxBottomFrontEdge(self, self))
 
