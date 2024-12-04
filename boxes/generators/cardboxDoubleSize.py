@@ -181,29 +181,33 @@ Whole box (early version still missing grip rail on the lid):
         pos =  0.5 * t
         #self.fingerHolesAt(pos, 0, y, 90)
 
-    def divider_back_and_front(self):
-        t = self.thickness
-        y = self.boxheight
-        pos =  0.5 * t
-        self.fingerHolesAt(pos, 0, y, 90)
+    def divider_back(self):
+        self.divider_front_left_c(0)
+        self.divider_front_right_c(self.boxwidth,0 )
 
     def divider_front_left(self):
+        self.divider_front_left_c(1)
+
+    def divider_front_left_c(self,thicRatio):
         t = self.thickness
         y = self.heightFirstStar
         w= self.horizontalDif/2
-        pos =  1.5 * t+w
-        self.fingerHolesAt(pos, t, y, 90)
-        pos = 0.5 * t + y
-        self.fingerHolesAt(t, pos, w, 0)
+        pos = (thicRatio+0.5) * t+w
+        self.fingerHolesAt(pos, t*thicRatio, y, 90)
+        pos = (thicRatio+0.5) * t + y
+        self.fingerHolesAt(t*thicRatio, pos, w, 0)
 
     def divider_front_right(self):
+        self.divider_front_right_c( (self.boxwidth / 3),1)
+
+    def divider_front_right_c(self,lengPiece,thicRatio):
         t = self.thickness
         y = self.heightFirstStar
         w= self.horizontalDif/2
-        pos =  (self.boxwidth / 3)-(0.5 * t+w)
-        self.fingerHolesAt(pos, t, y, 90)
-        posx = (self.boxwidth / 3)-w
-        pos = 0.5 * t + y
+        pos =  lengPiece-(0.5 * t+w)
+        self.fingerHolesAt(pos, t*thicRatio, y, 90)
+        posx = (lengPiece)-w
+        pos = (thicRatio+0.5) * t + y
         self.fingerHolesAt(posx, pos, w, 0)
 
     def getcardlenght(self,position):
@@ -237,7 +241,7 @@ Whole box (early version still missing grip rail on the lid):
         #self.addPart(p)
 
         with self.saved_context():
-            self.rectangularWall(x, h + t , "FFeF",callback=[self.divider_back_and_front],
+            self.rectangularWall(x, h + t , "FFeF",callback=[self.divider_back],
              move="right", label="Back")
 
         self.rectangularWall(x, h + t, "EEEE", move="up only")
