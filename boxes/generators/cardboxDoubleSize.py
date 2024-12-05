@@ -126,7 +126,7 @@ Whole box (early version still missing grip rail on the lid):
         )
 
     @property
-    def widthFirstCard(self):
+    def lenghtFirstCard(self):
         cardlen = 0
         # taille supplémentaire case en fonction de la presence ou non de sleeves
         vert_up = 8 if (self.sleeved_cards) else 3
@@ -142,7 +142,7 @@ Whole box (early version still missing grip rail on the lid):
         return (cardlen)
 
     @property
-    def widthSecondCard(self):
+    def lenghtSecondCard(self):
         cardlen = 0
         # taille supplémentaire case en fonction de la presence ou non de sleeves
         vert_up = 8 if (self.sleeved_cards) else 3
@@ -158,7 +158,7 @@ Whole box (early version still missing grip rail on the lid):
         return (cardlen)
 
     @property
-    def lenghtFirstCard(self):
+    def widthFirstCard(self):
         cardlen = 0
         # taille supplémentaire case en fonction de la presence ou non de sleeves
         horiz_up = 4 if (self.sleeved_cards) else 3
@@ -174,7 +174,7 @@ Whole box (early version still missing grip rail on the lid):
         return cardlen
 
     @property
-    def lenghtSecondCard(self):
+    def widthSecondCard(self):
         cardlen = 0
         # taille supplémentaire case en fonction de la presence ou non de sleeves
         horiz_up = 4 if (self.sleeved_cards) else 3
@@ -239,12 +239,13 @@ Whole box (early version still missing grip rail on the lid):
 
     def getcardlenght(self,position):
         if position == 'horizontal' :
-            return max(self.widthFirstCard,self.widthSecondCard)
+            return max(self.lenghtFirstCard,self.lenghtSecondCard)
         else:
-            return max(self.lenghtSecondCard, self.lenghtFirstCard)
+            return max(self.widthFirstCard, self.widthSecondCard)
+
     @property
     def horizontalDif(self):
-        return abs(self.widthFirstCard-self.widthSecondCard)
+        return abs(self.lenghtFirstCard-self.lenghtSecondCard)
 
     @property
     def heightFirstStar(self):
