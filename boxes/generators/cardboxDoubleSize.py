@@ -74,7 +74,7 @@ Whole box (early version still missing grip rail on the lid):
     def __init__(self) -> None:
         Boxes.__init__(self)
         self.addSettingsArgs(edges.FingerJointSettings)
-        self.buildArgParser(y=720,x=500, h=40)
+        self.buildArgParser(y=720,x=500, h=27)
 
         self.argparser.add_argument(
             "--first_case_size", action="store", type=str, default="tarot",
@@ -82,17 +82,17 @@ Whole box (early version still missing grip rail on the lid):
             help="size of the card to store, y and x wont be used. Poker : 63.5*89 mm cards.  minipoker : 45*68mm cards")
 
         self.argparser.add_argument(
-            "--first_stage", action="store", type=float, default=0.5,
+            "--first_stage", action="store", type=float, default=0.54,
             help="Height of the first stage, multiple of height"
         )
 
         self.argparser.add_argument(
-            "--first_width", action="store", type=float, default=65,
+            "--first_width", action="store", type=float, default=68,
             help="width of the first card, only for custom card"
         )
 
         self.argparser.add_argument(
-            "--first_length", action="store", type=float, default=100,
+            "--first_length", action="store", type=float, default=103,
             help="length of the first card, only for custom card"
         )
 
@@ -102,12 +102,12 @@ Whole box (early version still missing grip rail on the lid):
             help="size of the card to store, y and x wont be used. Poker : 63.5*89 mm cards.  minipoker : 45*68mm cards")
 
         self.argparser.add_argument(
-            "--second_width", action="store", type=float, default=60,
+            "--second_width", action="store", type=float, default=63,
             help="width of the second card, only for custom card"
         )
 
         self.argparser.add_argument(
-            "--second_length", action="store", type=float, default=115,
+            "--second_length", action="store", type=float, default=118,
             help="length of the second card, only for custom card"
         )
 
@@ -194,11 +194,10 @@ Whole box (early version still missing grip rail on the lid):
     def boxheight(self):
         return self.h
 
-
     def divider_bottom(self):
         t = self.thickness
         y = self.boxdepth
-        pos =  0.5 * t+self.horizontalDif/2
+        pos =  0.5 * t+self.horizontalDif/2-self.thickness
         self.fingerHolesAt(pos, 0, y, 90)
         pos = self.boxwidth-pos
         self.fingerHolesAt(pos, 0, y, 90)
@@ -212,8 +211,8 @@ Whole box (early version still missing grip rail on the lid):
 
     def divider_front_left_c(self,thicRatio):
         t = self.thickness
-        y = self.heightFirstStar
-        w= self.horizontalDif/2
+        y = self.heightFirstStar-self.thickness
+        w= self.horizontalDif/2-self.thickness
         pos = (thicRatio+0.5) * t+w
         self.fingerHolesAt(pos, t*thicRatio, y, 90)
         pos = (thicRatio+0.5) * t + y
@@ -224,8 +223,8 @@ Whole box (early version still missing grip rail on the lid):
 
     def divider_front_right_c(self,lengPiece,thicRatio):
         t = self.thickness
-        y = self.heightFirstStar
-        w= self.horizontalDif/2
+        y = self.heightFirstStar-self.thickness
+        w= self.horizontalDif/2-self.thickness
         pos =  lengPiece-(0.5 * t+w)
         self.fingerHolesAt(pos, t*thicRatio, y, 90)
         posx = (lengPiece)-w
@@ -234,7 +233,7 @@ Whole box (early version still missing grip rail on the lid):
 
     def divider_side(self):
         t = self.thickness
-        y = self.heightFirstStar+0.5*t
+        y = self.heightFirstStar-0.5*t
         self.fingerHolesAt(0, y, self.boxdepth, 0)
 
     def getcardlenght(self,position):
@@ -281,7 +280,7 @@ Whole box (early version still missing grip rail on the lid):
              move="right", label="Back")
 
         self.rectangularWall(x, h + t, "EEEE", move="up only")
-        diff = self.horizontalDif/2
+        diff = self.horizontalDif/2-self.thickness
         #self.rectangularWall(diff, h + t, "Ffef", move="right", label="Outer Side Left")
         if (diff > t):
             with self.saved_context():
@@ -291,8 +290,8 @@ Whole box (early version still missing grip rail on the lid):
 
         if (self.heightFirstStar > t):
             with self.saved_context():
-                self.rectangularWall(y, self.heightFirstStar, "ffFf", move="right", label="premier coté Etage")
-                self.rectangularWall(y, self.heightFirstStar, "ffFf", move="right", label="deuxieme coté Etage")
+                self.rectangularWall(y, self.heightFirstStar-self.thickness, "ffFf", move="right", label="premier coté Etage")
+                self.rectangularWall(y, self.heightFirstStar-self.thickness, "ffFf", move="right", label="deuxieme coté Etage")
             self.rectangularWall(x, self.heightFirstStar, "EEEE", move="up only")
 
         with self.saved_context():
