@@ -197,7 +197,7 @@ Whole box (early version still missing grip rail on the lid):
     def divider_bottom(self):
         t = self.thickness
         y = self.boxdepth
-        pos =  0.5 * t+self.horizontalDif/2-self.thickness
+        pos =  0.5 * t+self.horizontalDif
         self.fingerHolesAt(pos, 0, y, 90)
         pos = self.boxwidth-pos
         self.fingerHolesAt(pos, 0, y, 90)
@@ -211,8 +211,8 @@ Whole box (early version still missing grip rail on the lid):
 
     def divider_front_left_c(self,thicRatio):
         t = self.thickness
-        y = self.heightFirstStar-self.thickness
-        w= self.horizontalDif/2-self.thickness
+        y = self.heightFirstStar
+        w= self.horizontalDif
         pos = (thicRatio+0.5) * t+w
         self.fingerHolesAt(pos, t*thicRatio, y, 90)
         pos = (thicRatio+0.5) * t + y
@@ -223,8 +223,8 @@ Whole box (early version still missing grip rail on the lid):
 
     def divider_front_right_c(self,lengPiece,thicRatio):
         t = self.thickness
-        y = self.heightFirstStar-self.thickness
-        w= self.horizontalDif/2-self.thickness
+        y = self.heightFirstStar
+        w= self.horizontalDif
         pos =  lengPiece-(0.5 * t+w)
         self.fingerHolesAt(pos, t*thicRatio, y, 90)
         posx = (lengPiece)-w
@@ -233,7 +233,7 @@ Whole box (early version still missing grip rail on the lid):
 
     def divider_side(self):
         t = self.thickness
-        y = self.heightFirstStar-0.5*t
+        y = self.heightFirstStar+0.5*t
         self.fingerHolesAt(0, y, self.boxdepth, 0)
 
     def getcardlenght(self,position):
@@ -244,15 +244,15 @@ Whole box (early version still missing grip rail on the lid):
 
     @property
     def horizontalDif(self):
-        return abs(self.lenghtFirstCard-self.lenghtSecondCard)
+        return abs(self.lenghtFirstCard-self.lenghtSecondCard)/2-self.thickness
 
     @property
     def heightFirstStar(self):
-        return self.boxheight*self.first_stage
+        return self.boxheight*self.first_stage-self.thickness
 
     @property
     def needTop(self):
-        return self.horizontalDif/2>self.thickness
+        return self.horizontalDif>self.thickness
 
     @property
     def needStage(self):
@@ -280,18 +280,18 @@ Whole box (early version still missing grip rail on the lid):
              move="right", label="Back")
 
         self.rectangularWall(x, h + t, "EEEE", move="up only")
-        diff = self.horizontalDif/2-self.thickness
+        diff = self.horizontalDif
         #self.rectangularWall(diff, h + t, "Ffef", move="right", label="Outer Side Left")
-        if (diff > t):
+        if self.needTop:
             with self.saved_context():
                 self.rectangularWall(y, diff, "ffff", move="right", label="premier dessus")
                 self.rectangularWall(y, diff, "ffff", move="right", label="deuxieme dessus")
             self.rectangularWall(x, diff*1.1, "EEEE", move="up only")
 
-        if (self.heightFirstStar > t):
+        if self.needStage:
             with self.saved_context():
-                self.rectangularWall(y, self.heightFirstStar-self.thickness, "ffFf", move="right", label="premier coté Etage")
-                self.rectangularWall(y, self.heightFirstStar-self.thickness, "ffFf", move="right", label="deuxieme coté Etage")
+                self.rectangularWall(y, self.heightFirstStar, "ffFf", move="right", label="premier coté Etage")
+                self.rectangularWall(y, self.heightFirstStar, "ffFf", move="right", label="deuxieme coté Etage")
             self.rectangularWall(x, self.heightFirstStar, "EEEE", move="up only")
 
         with self.saved_context():
