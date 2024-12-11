@@ -1,3 +1,15 @@
+[tool.poetry]
+name = "boxes"
+version = "0.1.0"
+description = "."
+authors = ["For"]
+license = "FU"
+repository = "https://github.com/Wurrzounet/boxes"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+markdown = "^3.7"
+qrcode = "^8.0"
 
 [build-system]
 requires = ["setuptools >= 63.0"]
