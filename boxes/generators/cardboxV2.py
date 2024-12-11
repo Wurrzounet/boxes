@@ -56,20 +56,31 @@ class BoxBottomFrontEdge(edges.BaseEdge):
                 self.edges["e"](self.thickness)
 
 class CardBoxV2(Boxes):
-    """Box for storage of playing cards, with versatile options"""
+    """Box for holding of playing cards, with versatile options"""
     ui_group = "Box"
 
     description = """
 ### Description
-Versatile Box for Storage of playing cards. Multiple different styles of storage are supported, e.g. a flat storage or a trading card deck box style storage. See images for ideas.
+Versatile Box for holding playing cards. 
+For board game insert. Imagined for a flat storage and not tested for other case.
+Tree basics cards size are proposed by default : 
+
+Tarot : 70\*120mm
+
+Poker : 63.5\*89 mm
+
+MiniPoker : 45\*68mm
+
+The margin is 3mm for unsleeved card (So a poker card will generate a 63.5\*92 space)
+
+The margin for sleeved card is 8mm for the lenght and 4mm for the width (So a poker card will generate a 64.5\*97 space) 
 
 #### Building instructions
-Place inner walls on floor first (if any). Then add the outer walls. Glue the two walls without finger joins to the inside of the side walls. Make sure there is no squeeze out on top, as this is going to form the rail for the lid.
+Place inner walls on floor first (if any). Then add the outer walls. Glue the two walls without finger joins to the inside of the side walls
 
-Add the top of the rails to the sides (front open) or to the back and front (right side open) and the grip rail to the lid.
-Details of the lid and rails
-![Details](static/samples/CardBox-detail.jpg)
-Whole box (early version still missing grip rail on the lid):
+Example of the empty box
+![Details](static/samples/CardBoxV2-detail.jpg)
+Full box with the sleeved 7th wonders Cards:
 """
 
     def generatesection(self,width):
@@ -89,7 +100,7 @@ Whole box (early version still missing grip rail on the lid):
         self.argparser.add_argument(
             "--case_size", action="store", type=str, default="custom",
             choices=['tarot','poker', 'minipoker', 'custom'],
-            help="size of the card to store, y and x wont be used. Poker : 63.5*89 mm cards.  minipoker : 45*68mm cards")
+            help="size of the card to store, y and x wont be used. Tarot : 70\*120mm ; Poker : 63.5\*89mm ; minipoker : 45\*68mm")
         self.argparser.add_argument(
             "--card_position", action="store", type=str, default="vertical",
             choices=['vertical', 'horizontal'],

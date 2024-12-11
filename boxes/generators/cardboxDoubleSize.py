@@ -60,14 +60,15 @@ class CardBoxDoubleSize(Boxes):
 
     description = """
 ### Description
-Versatile Box for Storage of playing cards. Multiple different styles of storage are supported, e.g. a flat storage or a trading card deck box style storage. See images for ideas.
+Box holder for two size of card. the first floor will always be for the smallest card, regardless of the input.
+Strange thing can happen if half of the difference of the card is less than the thickness. 
 
 #### Building instructions
 Place inner walls on floor first (if any). Then add the outer walls. Glue the two walls without finger joins to the inside of the side walls. Make sure there is no squeeze out on top, as this is going to form the rail for the lid.
 
 Add the top of the rails to the sides (front open) or to the back and front (right side open) and the grip rail to the lid.
 Details of the lid and rails
-![Details](static/samples/CardBox-detail.jpg)
+![Details](static/samples/CardboxDoubleSize-Detail.jpg)
 Whole box (early version still missing grip rail on the lid):
 """
 
@@ -79,7 +80,7 @@ Whole box (early version still missing grip rail on the lid):
         self.argparser.add_argument(
             "--first_case_size", action="store", type=str, default="tarot",
             choices=['tarot','poker', 'minipoker', 'custom'],
-            help="size of the card to store, y and x wont be used. Poker : 63.5*89 mm cards.  minipoker : 45*68mm cards")
+            help="size of the card to store, y and x wont be used. Tarot : 70\*120mm ; Poker : 63.5\*89mm ; minipoker : 45\*68mm")
 
         self.argparser.add_argument(
             "--first_stage", action="store", type=float, default=0.5,
@@ -99,7 +100,7 @@ Whole box (early version still missing grip rail on the lid):
         self.argparser.add_argument(
             "--second_case_size", action="store", type=str, default="poker",
             choices=['tarot', 'poker', 'minipoker', 'custom'],
-            help="size of the card to store, y and x wont be used. Poker : 63.5*89 mm cards.  minipoker : 45*68mm cards")
+            help="size of the card to store, y and x wont be used. Tarot : 70\*120mm ; Poker : 63.5\*89mm ; minipoker : 45\*68mm")
 
         self.argparser.add_argument(
             "--second_width", action="store", type=float, default=60,
