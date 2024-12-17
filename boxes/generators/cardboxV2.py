@@ -65,15 +65,15 @@ Versatile Box for holding playing cards.
 For board game insert. Imagined for a flat storage and not tested for other case.
 Tree basics cards size are proposed by default : 
 
-Tarot : 70\*120mm
+Tarot : 70x120mm
 
-Poker : 63.5\*89 mm
+Poker : 63.5x89 mm
 
-MiniPoker : 45\*68mm
+MiniPoker : 45x68mm
 
-The margin is 3mm for unsleeved card (So a poker card will generate a 63.5\*92 space)
+The margin is 3mm for unsleeved card (So a poker card will generate a 63.5x92 space)
 
-The margin for sleeved card is 8mm for the lenght and 4mm for the width (So a poker card will generate a 64.5\*97 space) 
+The margin for sleeved card is 8mm for the lenght and 4mm for the width (So a poker card will generate a 64.5x97 space) 
 
 #### Building instructions
 Place inner walls on floor first (if any). Then add the outer walls. Glue the two walls without finger joins to the inside of the side walls
@@ -100,7 +100,7 @@ Full box with the sleeved 7th wonders Cards:
         self.argparser.add_argument(
             "--case_size", action="store", type=str, default="custom",
             choices=['tarot','poker', 'minipoker', 'custom'],
-            help="size of the card to store, y and x wont be used. Tarot : 70\*120mm ; Poker : 63.5\*89mm ; minipoker : 45\*68mm")
+            help="size of the card to store, y and x wont be used. Tarot : 70x120mm ; Poker : 63.5x89mm ; minipoker : 45x68mm")
         self.argparser.add_argument(
             "--card_position", action="store", type=str, default="vertical",
             choices=['vertical', 'horizontal'],
