@@ -118,7 +118,7 @@ boxes.ArgumentParser = ThrowingArgumentParser  # type: ignore
 class BServer:
     lang_re = re.compile(r"([a-z]{2,3}(-[-a-zA-Z0-9]*)?)\s*(;\s*q=(\d\.?\d*))?")
 
-    def __init__(self, url_prefix="", static_url="static") -> None:
+    def __init__(self, url_prefix="", static_url="static", legal_url="") -> None:
         self.boxes = {b.__name__: b for b in boxes.generators.getAllBoxGenerators().values() if b.webinterface}
         self.groups = boxes.generators.ui_groups
         self.groups_by_name = boxes.generators.ui_groups_by_name
@@ -133,6 +133,7 @@ class BServer:
         self._cache: dict[Any, Any] = {}
         self.url_prefix = url_prefix
         self.static_url = static_url
+        self.legal_url = legal_url
 
     def getLanguages(self, domain=None, localedir=None):
         if self._languages is not None:
@@ -246,6 +247,11 @@ class BServer:
 <div>
 <div class="clear"></div>
 <hr>
+<div class="linkbar">                                                                                                                                             <ul>
+{self.genLinks(lang)}
+</ul>
+</div>
+<hr>
 <h2 style="margin: 0px 0px 0px 20px;">{_(name)}</h2>
         <p>{_(box.__doc__) if box.__doc__ else ""}</p>
 <form action="{action}" method="GET" rel="nofollow">
@@ -294,7 +300,6 @@ class BServer:
 </div>
 </div>
 </div>
-{self.genPagePartFooter(lang)}
 </body>
 </html>
         ''')
@@ -320,7 +325,6 @@ class BServer:
 <div class="container">
 <div style="width: 75%; float: left;">
 {self.genPagePartHeader(lang)}
-
 <div class="modenav">
 <span class="modebutton"><a href="Gallery">{_("Gallery")}</a></span>
 <span class="modebutton modeactive">{_("Menu")}</span>
@@ -357,7 +361,6 @@ class BServer:
 <hr>
 </div>
 </div>
-{self.genPagePartFooter(lang)}
 </body>
 </html>
 """)
@@ -375,7 +378,6 @@ class BServer:
         return f'''
             <meta charset="utf-8">
             <meta name="viewport" content="width=device-width, initial-scale=1">
-            <meta name="flattr:id" content="456799">
             <link rel="icon" type="image/svg+xml" href="{self.static_url}/boxes-logo.svg" sizes="any">
             <link rel="icon" type="image/x-icon" href="{self.static_url}/favicon.ico">
         '''
@@ -439,24 +441,25 @@ class BServer:
 <div>
 
 <div class="clear"></div>
-
-<div class="search">
-\U0001f50d <input autocomplete="off" type="search" oninput="filterSearchItems();" name="search" id="search" placeholder="Search">
-</div>"""
-
-    def genPagePartFooter(self, lang) -> str:
-        _ = lang.gettext
-
-        return """
-<div class="footer">
+<hr/>
+<div class="linkbar">
 <ul>
-  <li>""" + self.genHTMLLanguageSelection(lang) + """</li>
-  <li><a href="https://florianfesti.github.io/boxes/html/usermanual.html" target="_blank" rel="noopener">""" + _("Help") + """</a></li>
-  <li><a href="https://hackaday.io/project/10649-boxespy" target="_blank" rel="noopener">""" + _("Home Page") + """</a></li>
-  <li><a href="https://florianfesti.github.io/boxes/html/index.html" target="_blank" rel="noopener">""" + _("Documentation") + """</a></li>
-  <li><a href="https://github.com/florianfesti/boxes" target="_blank" rel="noopener">""" + _("Sources") + """</a></li>
+{self.genLinks(lang)}
+  <li class="right">\U0001f50d <input autocomplete="off" type="search" oninput="filterSearchItems();" name="search" id="search" placeholder="Search"></li>
 </ul>
 </div>
+<hr/>
+"""
+
+    def genLinks(self, lang):
+        _ = lang.gettext
+        return f"""  <li><a href="https://florianfesti.github.io/boxes/html/usermanual.html" target="_blank" rel="noopener">{_("Help")}</a></li>
+  <li><a href="https://hackaday.io/project/10649-boxespy" target="_blank" rel="noopener">{_("Home Page")}</a></li>
+  <li><a href="https://florianfesti.github.io/boxes/html/index.html" target="_blank" rel="noopener">{_("Documentation")}</a></li>
+  <li><a href="https://github.com/florianfesti/boxes" target="_blank" rel="noopener">{_("Sources")}</a></li>
+{f'<li><a href="{self.legal_url}" target="_blank" rel="noopener">{_("Legal")}</a></li>' if self.legal_url else ''}
+  <li><a href="https://florianfesti.github.io/boxes/html/give_back.html" target="_blank" rel="noopener">{_("Give Back")}</a></li>
+  <li class="right">{self.genHTMLLanguageSelection(lang)}</li>
 """
 
     def genPageError(self, name, e, lang) -> list[bytes]:
@@ -572,7 +575,6 @@ class BServer:
         result.append(f"""
 </div><div style="width: 5%; float: left;"></div>
         <div class="clear"></div><hr></div>
-{self.genPagePartFooter(lang)}
 </body>
 </html>
 """
@@ -596,6 +598,11 @@ class BServer:
         for arg in args:
             if arg.startswith("render="):
                 render = arg[len("render="):]
+
+        if not self.legal_url:
+            if (environ.get('HTTP_HOST', '') == "boxes.hackerspace-bamberg.de" or
+                environ.get('SERVER_NAME', '') == "boxes.hackerspace-bamberg.de"):
+                self.legal_url = "https://www.hackerspace-bamberg.de/Datenschutz"
 
         lang = self.getLanguage(args, environ.get("HTTP_ACCEPT_LANGUAGE", ""))
         _ = lang.gettext
@@ -687,6 +694,8 @@ def main() -> None:
                         help="URL path to Boxes.py instance")
     parser.add_argument("--static_url", default="static",
                         help="URL of static content")
+    parser.add_argument("--legal_url", default="",
+                        help="URL of legal web page")
     args = parser.parse_args()
 
     boxserver = BServer(url_prefix=args.url_prefix, static_url=args.static_url)
