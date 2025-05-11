@@ -315,8 +315,11 @@ class BServer:
     <button type="button" onclick="preview_scale*= 1.2; document.getElementById('preview_img').style.width = preview_scale + '%';" >+</button>
     <button type="button" onclick="preview_scale=100; document.getElementById('preview_img').style.width = preview_scale + '%';" >{_("Reset")}</button>
   </div>
-<br>
+<div style="overflow: auto;">
+<figure id="preview_figure" style="width: max-content;">
 <img id="preview_img" style="width:100%" src="{self.static_url}/nothing.png">
+</figure>
+</div>
 </div>
 </body>
 </html>
@@ -759,5 +762,6 @@ def main() -> None:
 if __name__ == "__main__":
     main()
 else:
-    boxserver = BServer(static_url="https://florianfesti.github.io/boxes/static")
+    static_url = os.environ.get('STATIC_URL', 'https://florianfesti.github.io/boxes/static')
+    boxserver = BServer(static_url=static_url)
     application = boxserver.serve
