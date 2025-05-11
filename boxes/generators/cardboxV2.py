@@ -237,7 +237,7 @@ Full box with the sleeved 7th wonders Cards:
         self.rectangularWall(y, h + t, "fFfF", move="up only")
 
         with self.saved_context():
-            self.rectangularWall(x, y, "ffbf", callback=[self.divider_bottom],
+            self.rectangularWall(x, y, "ffff", callback=[self.divider_bottom],
                                  move="right", label="Bottom")
         self.rectangularWall(x, y*1.1, "eEEE", move="up only")
 
