@@ -416,7 +416,7 @@ class BServer:
         return f'<link rel="stylesheet" href="{self.static_url}/self.css">'
 
     def genHTMLJS(self) -> str:
-        return f'<script src="{self.static_url}/self.js"></script>'
+        return f'<script src="static/self.js"></script>'
 
     def genHTMLLanguageSelection(self, lang) -> str:
         """Generates a dropdown selection for the language change."""
@@ -754,7 +754,7 @@ def main() -> None:
     fc.start()
 
     httpd = make_server(args.host, args.port, boxserver.serve)
-    print(f"BoxesServer serving on {args.host}:{args.port}...")
+    print(f"BoxesServer serving on http://{args.host if args.host else '*'}:{args.port}/...")
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
