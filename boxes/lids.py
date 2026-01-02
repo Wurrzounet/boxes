@@ -15,7 +15,8 @@
 from __future__ import annotations
 
 import math
-from typing import Any, Callable
+from typing import Any
+from collections.abc import Callable
 
 import boxes
 from boxes import Boxes, edges
@@ -88,20 +89,22 @@ class Lid:
                 y2 += 2*t + self.play
             self.rectangularWall(x2, y2, "ffff",
                                  callback=[self.handleCB(x2, y2)],
-                                 move="up")
+                                 move="up", label="lid top")
+            # front/back top pieces
             self.rectangularWall(x2, self.height, b +"FFF",
-                                 ignore_widths=[1, 2, 5, 6], move="up")
+                                 ignore_widths=[1, 2, 5, 6], move="up", label="lid front")
             self.rectangularWall(x2, self.height, b + "FFF",
-                                 ignore_widths=[1, 2, 5, 6], move="up")
+                                 ignore_widths=[1, 2, 5, 6], move="up", label="lid back")
+            # left/right sides
             self.rectangularWall(y2, self.height, b + "fFf",
-                                 ignore_widths=[1, 2, 5, 6], move="up")
+                                 ignore_widths=[1, 2, 5, 6], move="up", label="lid left")
             self.rectangularWall(y2, self.height, b + "fFf",
-                                 ignore_widths=[1, 2, 5, 6], move="up")
+                                 ignore_widths=[1, 2, 5, 6], move="up", label="lid right")
             if style == "ontop":
                 for _ in range(4):
                     self.polygonWall(
                         (2*t, (90, t), t+self.height, 90, 4*t, 90,
-                         t+self.height, (90, t)), "e", move="up")
+                         t+self.height, (90, t)), "e", move="up", label="lid\nbrim")
         else:
             return False
 
@@ -231,7 +234,7 @@ class Lid:
         if self.move(tw, th, move, True, label=label):
             return
 
-        self.cc(callback, 0, self.edges["A"].startwidth()+self.burn)
+        self.cc(callback, 0, self.edges["A"].startWidth()+self.burn)
         self.edges["A"](3*t)
         self.edges["X"](l, y+2*t)
         self.edges["A"](3*t)
@@ -239,7 +242,7 @@ class Lid:
         self.cc(callback, 1)
         self.edge(y+2*t)
         self.corner(90)
-        self.cc(callback, 2, self.edges["A"].startwidth()+self.burn)
+        self.cc(callback, 2, self.edges["A"].startWidth()+self.burn)
         self.edges["A"](3*t)
         self.edge(l)
         self.edges["A"](3*t)
@@ -332,6 +335,9 @@ class _TopEdge(Boxes):
         elif top_edge == "v":
             self.rectangularWall(x, y, "VEEE", move="up", label="lid top")
             self.edges["v"].parts(move="up")
+        elif top_edge == "E":
+            self.rectangularWall(x, y, "EEEE", move="up", label="lid top")
+            self.rectangularWall(x, y, "eeee", move="up", label="lid top")
         else:
             return False
         return True
