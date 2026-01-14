@@ -44,10 +44,11 @@ repos:
         args: [ --remove-all-unused-imports, --in-place, --ignore-pass-statements, ]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.18.2
+    rev: v1.19.1
     hooks:
       - id: mypy
         files: '^boxes/.*\.py$'
+        additional_dependencies: [ "types-PyYAML", "types-markdown" ]
       - id: mypy
         files: '^documentation/src/boxes2rst.py$'
       - id: mypy
@@ -55,14 +56,19 @@ repos:
       - id: mypy
         files: '^scripts/boxes2pot$'
       - id: mypy
+        files: '^scripts/boxes_proxy.py$'
+      - id: mypy
+        files: '^scripts/boxesserver$'
+      - id: mypy
+        files: '^scripts/boxes_generator$'
+      - id: mypy
         files: '^setup.py$'
 
   - repo: https://github.com/rstcheck/rstcheck
     rev: v6.2.5
     hooks:
       - id: rstcheck
-        args: [ "--report-level=error", "--ignore-directives=autoclass,automethod,automodule"]
-        additional_dependencies: [ sphinx ]
+        additional_dependencies: [ 'rstcheck[sphinx,toml]' ]
 
   - repo: https://github.com/shellcheck-py/shellcheck-py
     rev: v0.11.0.1
@@ -73,7 +79,7 @@ repos:
     rev: v2.4.1
     hooks:
       - id: codespell
-        exclude: ^(boxes|locale|po|static)/ # todo folder boxes
+        exclude: ^(locale|po|static)/
         additional_dependencies:
           - tomli
 
