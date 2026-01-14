@@ -123,7 +123,7 @@ For estetique improuvement we need to allow the possibilitty to made a "outside"
 
         # Facing walls (outer) with finger holes to support side walls
         facing_wall_length = sum(self.sx) + self.get_side_thickness() * (len(self.sx) + 1)#+self.thickness*2
-        side_edge = lambda with_wall: "F" if with_wall else "e"
+        side_edge = lambda with_wall: "F" if with_wall else "F"#old way was e
         bottom_edge = ("F")
         upper_edge = ("e")
         for i in range(2):
@@ -180,9 +180,9 @@ For estetique improuvement we need to allow the possibilitty to made a "outside"
             side_wall_length,
             [
                 "f",
-                "f" if self.right_wall else "e",
                 "f",
-                "f" if self.left_wall else "e",
+                "f",
+                "f",
             ],
             callback=[partial(self.generate_finger_holes, side_wall_length)],
             move="up", label="Bottom",
@@ -192,9 +192,9 @@ For estetique improuvement we need to allow the possibilitty to made a "outside"
             side_wall_length,
             [
                 "f",
-                "f" if self.right_wall else "e",
                 "f",
-                "f" if self.left_wall else "e",
+                "f",
+                "f",
             ],
             move="up", label="UP",
         )

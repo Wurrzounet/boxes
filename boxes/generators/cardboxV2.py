@@ -20,27 +20,6 @@ from docutils.nodes import label
 
 from boxes import BoolArg, Boxes, edges
 
-
-class InsetEdgeSettings(edges.Settings):
-    """Settings for InsetEdge"""
-    absolute_params = {
-        "thickness": 0,
-    }
-
-
-class InsetEdge(edges.BaseEdge):
-    """An edge with space to slide in a lid"""
-    def __call__(self, length, **kw):
-        t = self.settings.thickness
-        self.corner(90)
-        self.edge(t, tabs=2)
-        self.corner(-90)
-        self.edge(length, tabs=2)
-        self.corner(-90)
-        self.edge(t, tabs=2)
-        self.corner(90)
-
-
 class FingerHoleEdgeSettings(edges.Settings):
     """Settings for FingerHoleEdge"""
     absolute_params = {
@@ -64,47 +43,53 @@ class FingerHoleEdge(edges.BaseEdge):
 class BoxBottomFrontEdge(edges.BaseEdge):
     char = 'b'
     def __call__(self, length, **kw):
-
-        y = self.boxdepth
-        sx = self.sx
         bottom = max(self.settings.sx) / 3
-
-        f = 0.4
-        a1 = math.degrees(math.atan(f/(1-f)))
-        a2 = 45 + a1
-        #self.corner(-a1)
-        #self.edges["e"](self.thickness)
         for i, l in enumerate(self.settings.sx):
             self.edges["f"](bottom)
-            self.edges["e"](bottom)
+            self.corner(90)
+            self.edge(0)
+            self.corner(-180, bottom/2)
+            self.edge(0)
+            self.corner(90)
             self.edges["f"](bottom)
             if i < len(self.settings.sx)-1:
                 self.edges["e"](self.thickness)
-            #if i < len(self.settings.sx)-1:
-            #    self.polyline(0, -45, self.thickness, -a1)
-            #else:
-            #    self.corner(-45)
-
-        #self.edges["e"](self.thickness)
-    def margin(self) -> float:
-        return max(self.settings.sx) * 0.4
 
 class CardBoxV2(Boxes):
-    """Box for storage of playing cards, with versatile options"""
+    """Box for holding of playing cards, with versatile options"""
     ui_group = "Box"
 
     description = """
 ### Description
-Versatile Box for Storage of playing cards. Multiple different styles of storage are supported, e.g. a flat storage or a trading card deck box style storage. See images for ideas.
+Versatile Box for holding playing cards. 
+For board game insert. Imagined for a flat storage and not tested for other case.
+Tree basics cards size are proposed by default : 
+
+Tarot : 70x120mm
+
+Poker : 63.5x89 mm
+
+MiniPoker : 45x68mm
+
+The margin is 3mm for unsleeved card (So a poker card will generate a 63.5x92 space)
+
+The margin for sleeved card is 8mm for the lenght and 4mm for the width (So a poker card will generate a 64.5x97 space) 
 
 #### Building instructions
-Place inner walls on floor first (if any). Then add the outer walls. Glue the two walls without finger joins to the inside of the side walls. Make sure there is no squeeze out on top, as this is going to form the rail for the lid.
+Place inner walls on floor first (if any). Then add the outer walls. Glue the two walls without finger joins to the inside of the side walls
 
-Add the top of the rails to the sides (front open) or to the back and front (right side open) and the grip rail to the lid.
-Details of the lid and rails
-![Details](static/samples/CardBox-detail.jpg)
-Whole box (early version still missing grip rail on the lid):
+Example of the empty box
+![Details](static/samples/CardBoxV2-detail.jpg)
+Full box with the sleeved 7th wonders Cards:
 """
+
+    def generatesection(self,width):
+
+        result = []
+        for i in range(self.number_case):
+            result.append(float(width))
+        return result
+
 
     def __init__(self) -> None:
         Boxes.__init__(self)
@@ -113,24 +98,36 @@ Whole box (early version still missing grip rail on the lid):
         self.buildArgParser(y=72, h=20, outside=False, sx="52*3")
 
         self.argparser.add_argument(
+            "--case_size", action="store", type=str, default="custom",
+            choices=['tarot','poker', 'minipoker', 'custom'],
+            help="size of the card to store, y and x wont be used. Tarot : 70x120mm ; Poker : 63.5x89mm ; minipoker : 45x68mm")
+        self.argparser.add_argument(
+            "--card_position", action="store", type=str, default="vertical",
+            choices=['vertical', 'horizontal'],
+            help="position of the card in the case. Vertical mean that de short edge of the card will be in the bottom size. Not used for custom card size")
+        self.argparser.add_argument(
+            "--sleeved_cards", action="store", type=BoolArg(), default=True,
+            help="Add a small gap the case, to allow to put sleeved card in it (add 4mm for the width and 6 mm for the height of the card. Not used for custom card size"
+        )
+        self.argparser.add_argument(
+            "--number_case", action="store", type=int, default=3,
+            help="Number of case.")
+        self.argparser.add_argument(
+            "--add_lid", action="store", type=BoolArg(), default=False,
+            help="Add a lid to help to keep cards in place."
+        )
+        self.argparser.add_argument(
+            "--lid_play", action="store", type=float, default=0.15,
+            help="Add a play between lid and insert. Multiple of thickness"
+        )
+        self.argparser.add_argument(
             "--fingerhole", action="store", type=str, default="custom",
             choices=['regular', 'deep', 'custom'],
             help="Depth of cutout to grab the cards")
         self.argparser.add_argument(
-            "--fingerhole_depth", action="store", type=float, default=20,
+            "--fingerhole_depth", action="store", type=float, default=10,
             help="Depth of cutout if fingerhole is set to 'custom'. Disabled otherwise.")
-        self.argparser.add_argument(
-            "--add_lidtopper", action="store", type=BoolArg(), default=False,
-            help="Add an additional lid topper for optical reasons and customisation"
-        )
-        self.argparser.add_argument(
-            "--add_lid", action="store", type=BoolArg(), default=False,
-            help="Add the topper"
-        )
-        self.argparser.add_argument(
-            "--add_side", action="store", type=BoolArg(), default=False,
-            help="Add the innder side"
-        )
+
 
     @property
     def fingerholedepth(self):
@@ -147,18 +144,17 @@ Whole box (early version still missing grip rail on the lid):
 
     #inner dimensions of surrounding box (disregarding inlays)
     @property
-    def boxhight(self):
+    def boxheight(self):
         if self.outside:
-            return self.h - 3 * self.thickness
+            return self.h -  self.thickness
         return self.h
     @property
     def boxwidth(self):
-        return (len(self.sx) + (1 if (self.add_side) else -1)) * self.thickness + sum(self.sx)
+        return (len(self.sx)  -1) * self.thickness + sum(self.sx)
     @property
     def boxdepth(self):
         if self.outside:
             return self.y - 2 * self.thickness
-
         return self.y
 
     def divider_bottom(self):
@@ -166,47 +162,63 @@ Whole box (early version still missing grip rail on the lid):
         sx = self.sx
         y = self.boxdepth
 
-        pos = (0.5 if(self.add_side) else -0.5) * t
+        pos =  -0.5 * t
         for i in sx[:-1]:
             pos += i + t
             self.fingerHolesAt(pos, 0, y, 90)
 
-    def yHoles(self):
-        posy = -0.5 * self.thickness
-        for y in reversed(self.sx[1:]):
-            posy += y + self.thickness
-            self.fingerHolesAt(posy, 0, self.boxhight)
-
     def divider_back_and_front(self):
         t = self.thickness
         sx = self.sx
-        y = self.boxhight
+        y = self.boxheight
 
-        pos = (0.5 if(self.add_side) else -0.5) * t
+        pos =  -0.5 * t
         for i in sx[:-1]:
             pos += i + t
             self.fingerHolesAt(pos, 0, y, 90)
 
     def divider_front(self):
         t = self.thickness
-        y = self.boxhight
+        y = self.boxheight
 
-        pos = 1.5* t + max(self.sx) / 3
-        self.fingerHolesAt(pos, 0, y+(t*2), 90)
+        pos = 0.5* t + max(self.sx) / 3
+        self.fingerHolesAt(pos, t, y, 90)
+
+    def getcardlenght(self,position):
+        cardlen = 0
+        # taille supplémentaire case en fonction de la presence ou non de sleeves
+        vert_up = 8 if(self.sleeved_cards) else 3
+        horiz_up = 4 if (self.sleeved_cards) else 3
+        match self.case_size:
+            case 'poker':
+                if self.card_position == position:
+                    cardlen=89 +vert_up
+                else:
+                    cardlen =63.5+horiz_up
+            case 'minipoker':
+                if self.card_position == position:
+                    cardlen=68+vert_up
+                else:
+                    cardlen =45+horiz_up
+            case 'tarot':
+                if self.card_position == position:
+                    cardlen = 120 + vert_up
+                else:
+                    cardlen = 70 + horiz_up
+        return cardlen
 
     def render(self):
+        if(self.case_size != 'custom'):
+            self.y = self.getcardlenght('vertical')
+            self.sx = self.generatesection(self.getcardlenght('horizontal'))
+
         self.addPart(BoxBottomFrontEdge(self, self))
-        t = self.thickness if(self.add_lid) else 0
 
-        h = self.boxhight
-        x = self.boxwidth
+        t = 0
         y = self.boxdepth
+        h = self.boxheight
         sx = self.sx
-
-        s = InsetEdgeSettings(thickness=t)
-        p = InsetEdge(self, s)
-        p.char = "a"
-        self.addPart(p)
+        x = self.boxwidth
 
         s = FingerHoleEdgeSettings(thickness=t, wallheight=h, fingerholedepth=self.fingerholedepth)
         p = FingerHoleEdge(self, s)
@@ -214,96 +226,56 @@ Whole box (early version still missing grip rail on the lid):
         self.addPart(p)
 
         with self.saved_context():
-            self.rectangularWall(x, h + t , [
-                "F",
-                "F",
-                "E" if(self.add_lid) else "e",
-                "F",
-            ],
-                                 callback=[self.divider_back_and_front],
-                                 move="right",
-                                 label="Back")
-            self.rectangularWall(x, h +t, [
-                "F",
-                "F",
-                "a" if(self.add_lid) else "e",
-                "F",
-            ],
-                                 callback=[self.divider_back_and_front],
-                                 move="right",
-                                 label="Front")
+            self.rectangularWall(x, h + t , "FFeF",callback=[self.divider_back_and_front],
+             move="right", label="Back")
+
         self.rectangularWall(x, h + t, "EEEE", move="up only")
 
         with self.saved_context():
-            self.rectangularWall(y, h + t, [
-                "F",
-                "f",
-                "F" if(self.add_lid) else "e",
-                "f",
-            ], move="right", label="Outer Side Left")
-            self.rectangularWall(y, h + t,[
-                "F",
-                "f",
-                "F" if(self.add_lid) else "e",
-                "f",
-            ]
-
-            , move="right", label="Outer Side Right")
+            self.rectangularWall(y, h + t, "Ffef", move="right", label="Outer Side Left")
+            self.rectangularWall(y, h + t, "Ffef", move="right", label="Outer Side Right")
         self.rectangularWall(y, h + t, "fFfF", move="up only")
 
-        if self.add_side:
-            with self.saved_context():
-                self.rectangularWall(y, h, "Aeee", move="right", label="Inner Side Left")
-                self.rectangularWall(y, h, "Aeee", move="right", label="Inner Side Right")
-            self.rectangularWall(y, h, "eAee", move="up only")
-
-        if self.add_lid:
-            with self.saved_context():
-                self.rectangularWall(y, t, "eefe", move="right", label="Lip Left")
-                self.rectangularWall(y, t, "feee", move="right", label="Lip Right")
-            self.rectangularWall(y, t * 2, "efee", move="up only")
-
-            with self.saved_context():
-                self.rectangularWall(x - t * .2, y, "eeFe", move="right", label="Lid")
-
-
-            self.rectangularWall(x, y, "eEEE", move="up only")
-            self.rectangularWall(x - t * .2, t, "fEeE", move="up", label="Lid Lip")
-
         with self.saved_context():
-            self.rectangularWall(x, y, "bfff", callback=[self.divider_bottom],
+            self.rectangularWall(x, y, "ffff", callback=[self.divider_bottom],
                                  move="right", label="Bottom")
-        self.rectangularWall(x, y*1.3, "eEEE", move="up only")
+        self.rectangularWall(x, y*1.1, "eEEE", move="up only")
 
         for i in range(len(sx) - 1):
             self.rectangularWall(h, y, "fAff", move="right", label="Divider")
 
-        if self.add_lidtopper:
-            self.rectangularWall(x, y - 2 * t, "eeee", move="right", label="Lid topper (optional)")
-
         #Ajout de cache avant, construit comme un rectangle avec un angle coupé,
-        #angle haut de la piece
-        angle=50
-        #hauteur de la coupe
-        hf=h*0.5
-        #"faux" bas, utilisé pour l'encoche,
+        #la base fait 1/3 de la case, la largeur sera à rajouter lors de la constuction
         falseBottom= max(self.sx) / 3
-        # vrai bas total
-        bottom=falseBottom+self.thickness
+        #la largeur de la partie haute sera de 1/3 de la base, soit 1/9eme de la largeur de la case
+        top= falseBottom*0.3
+        # la hauteur avant l'angle sera de 1/3 de la hauteur total, on ajout l'epaisseur pour raison de construction
+        hf = h * 0.3 + self.thickness
+        #la partie coupé, on la calcul, on est sur un triangle rectangle. de base on est sur un rectangle de taille Hauteur x 1/3 case.
+        #on a déjà coupé 1/3 de la hauteur et de la largeur, donc la coupe sera l'hypothénus du reste qui formera un triangle rectangle.
+        panel =math.sqrt( (h*0.7)*(h*0.7)+(falseBottom*0.7)*(falseBottom*0.7))
+        #on calcul maintenant l'angle en utilisant les règle du cosinus. adjacent/hypotenus = cos(angle)
+        angle = math. degrees(math.acos(falseBottom*0.7/panel))
 
-        hauteur=h+self.thickness
-        panel = min((hauteur-hf)/math.cos(math.radians(90-angle)),
-                    bottom/math.cos(math.radians(angle)))
-        top = bottom - panel * math.cos(math.radians(angle))
         # ordre des coté, construit dans le sens trigonometrique.
-        borders = [self.thickness,0,falseBottom, 90, hf, 90 - angle, panel, angle, top,
+        borders = [self.thickness,0,falseBottom, 90, hf, 90 - angle, panel, angle, top+self.thickness,
                        90, h,0,self.thickness , 90]
 
         self.polygonWall(borders, move="right",edge="eFeeeFe", label='front left')
-        borders = [falseBottom,0,self.thickness, 90,self.thickness,0,h,90,top,angle,panel,90-angle,hf,90]
+        borders = [falseBottom,0,self.thickness, 90,self.thickness,0,h,90,top+self.thickness,angle,panel,90-angle,hf,90]
         self.polygonWall(borders, move="right", edge="FeeFeee", label='front right')
-        borders = [self.thickness,0,falseBottom, 0, self.thickness,0, falseBottom,0,self.thickness, 90, hf,90 - angle,panel,angle,top*2+self.thickness,angle,panel,90-angle,hf,90]
+        borders = [falseBottom, 0, self.thickness,0, falseBottom, 90, hf,90 - angle,panel,angle,top*2+self.thickness,angle,panel,90-angle,hf,90]
         for i in sx[:-1]:
-            self.polygonWall(borders, move="right", edge="eFeFeeeeee",callback=[self.divider_front],)
+            self.polygonWall(borders, move="right", edge="FeFeeeee",callback=[self.divider_front],)
 
+        if (self.add_lid):
+            augment = self.thickness*(1+self.lid_play)
+            with self.saved_context():
+                self.rectangularWall(y+2*augment, h + augment,"Ffef", move="right", label="lid Side Right")
+                self.rectangularWall(y+2*augment, h + augment, "Ffef", move="right", label="lid Side Left")
+                self.rectangularWall(x+2*augment, h + augment, "FFeF", move="right", label="lid Side front")
+                self.rectangularWall(x+2*augment, h + augment,"FFeF", move="right", label="lid Side back")
+            self.rectangularWall(y, h + t, "fFfF", move="up only")
+            with self.saved_context():
+                self.rectangularWall(x+2*augment, y+2*augment, "ffff", move="right", label="lid top")
 
