@@ -385,7 +385,7 @@ class Boxes:
             help="thickness of the material (in mm) [\U0001F6C8](https://florianfesti.github.io/boxes/html/usermanual.html#thickness)")
         self.burn: float = 0.1
         defaultgroup.add_argument(
-            "--burn", action="store", type=float, default=0.1,
+            "--burn", action="store", type=float, default=0.09,
             help='burn correction (in mm)(bigger values for tighter fit) [\U0001F6C8](https://florianfesti.github.io/boxes/html/usermanual.html#burn)')
         self.format: str = "svg"
         defaultgroup.add_argument(
@@ -398,7 +398,7 @@ class Boxes:
             help="label the parts (where available)")
         self.reference: float = 100.0
         defaultgroup.add_argument(
-            "--reference", action="store", type=float, default=100.0,
+            "--reference", action="store", type=float, default=0.0,
             help="print reference rectangle with given length (in mm)(zero to disable) [\U0001F6C8](https://florianfesti.github.io/boxes/html/usermanual.html#reference)")
         self.tabs: float = 0.0
         defaultgroup.add_argument(
