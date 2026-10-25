@@ -3,7 +3,7 @@
 ci:
   autofix_prs: true
   autoupdate_schedule: quarterly
-exclude: '^(documentation/src/static|scripts/boxes|scripts/boxes_proxy.py|scripts/boxesserver|.*\.svg)$'
+exclude: '^(documentation/src/static|scripts/(boxes|boxes_generator|boxes_proxy\.py|boxesserver)|.*\.svg)$'
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -13,7 +13,6 @@ repos:
       - id: check-yaml
       - id: check-toml
       - id: check-added-large-files
-      - id: requirements-txt-fixer
       - id: check-case-conflict
       - id: detect-private-key
       - id: check-executables-have-shebangs
@@ -38,45 +37,52 @@ repos:
         args: [ --py310-plus ]
 
   - repo: https://github.com/PyCQA/autoflake
-    rev: v2.3.1
+    rev: v2.4.0
     hooks:
       - id: autoflake
         args: [ --remove-all-unused-imports, --in-place, --ignore-pass-statements, ]
 
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.10
+    hooks:
+      - id: ruff-check
+        types_or: [ python, pyproject ]
+        args: [ --fix ]
+      #- id: ruff-format
+
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.19.1
+    rev: v2.4.0
     hooks:
       - id: mypy
+        name: mypy - boxes
         files: '^boxes/.*\.py$'
         additional_dependencies: [ "types-PyYAML", "types-markdown" ]
       - id: mypy
+        name: mypy - documentation
         files: '^documentation/src/boxes2rst.py$'
       - id: mypy
+        name: mypy - boxes2inkscape
         files: '^scripts/boxes2inkscape$'
       - id: mypy
+        name: mypy - boxes2pot
         files: '^scripts/boxes2pot$'
       - id: mypy
-        files: '^scripts/boxes_proxy.py$'
-      - id: mypy
-        files: '^scripts/boxesserver$'
-      - id: mypy
-        files: '^scripts/boxes_generator$'
-      - id: mypy
+        name: mypy - setup
         files: '^setup.py$'
 
   - repo: https://github.com/rstcheck/rstcheck
-    rev: v6.2.5
+    rev: v6.3.0
     hooks:
       - id: rstcheck
         additional_dependencies: [ 'rstcheck[sphinx,toml]' ]
 
   - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.11.0.1
+    rev: v0.11.0.1-1
     hooks:
       - id: shellcheck
 
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.4.1
+    rev: v2.4.3
     hooks:
       - id: codespell
         exclude: ^(locale|po|static)/

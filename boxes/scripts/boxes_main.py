@@ -18,7 +18,7 @@ from typing import TextIO
 try:
     import boxes
 except ImportError:
-    sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../..'))
+    sys.path.append(Path(__file__).resolve().parent.parent.__str__())
     import boxes
 
 import boxes.generators
@@ -79,7 +79,7 @@ def multi_generate(config_path : Path|str|TextIO, output_path : Path|str, output
         if box_type != "__ALL__":
             box_classes = ( generators_by_name.get(box_type, None), )
             if box_classes is None:
-                raise ValueError("invalid generator '%s'" % box_type)
+                raise ValueError(f"invalid generator '{box_type}'")
         else:
             skipGenerators = set(box_settings.get("skipGenerators", []))
             brokenGenerators = set(box_settings.get("brokenGenerators", []))
@@ -255,7 +255,7 @@ def example_output_fname_formatter(box_type, name, box_idx, metadata, box_args):
     if not box_args:
         return f"{name}"
     else:
-        args_hash = hashlib.sha1(" ".join(sorted(box_args)).encode("utf-8")).hexdigest()
+        args_hash = hashlib.sha256(" ".join(sorted(box_args)).encode("utf-8")).hexdigest()
         return f"{name}_{args_hash[0:8]}"
 
 

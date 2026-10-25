@@ -72,6 +72,8 @@ class TypeTray(_TopEdge):
         self.addSettingsArgs(LidSettings)
         self.buildArgParser("sx", "sy", "h", "hi", "outside", "bottom_edge",
                             "top_edge")
+        self.addSettingsArgs(FingerHoleEdgeSettings)
+
         self.argparser.add_argument(
             "--back_height",  action="store", type=float, default=0.0,
             help="additional height of the back wall - e top edge only")
@@ -82,7 +84,7 @@ class TypeTray(_TopEdge):
             "--gripheight", action="store", type=float, default=30,
             dest="gh", help="height of the grip hole in mm")
         self.argparser.add_argument(
-            "--gripwidth", action="store", type=float, default=70,
+            "--gripwidth", action="store", type=float, default=0,
             dest="gw", help="width of th grip hole in mm (zero for no hole)")
         self.argparser.add_argument(
             "--handle", type=boolarg, default=False, help="add handle to the bottom (changes bottom edge in the front)")
@@ -117,21 +119,19 @@ class TypeTray(_TopEdge):
                 "--label_file", action="store", type=argparse.FileType('r'),
                 help="file with compartment labels. One line per compartment")
 
-        self.addSettingsArgs(FingerHoleEdgeSettings)
-
     @property
     def fingerholedepth(self):
-        if self.fingerhole == 'custom':
+        if self.fingerholes == 'custom':
             return self.fingerhole_depth
-        elif self.fingerhole == 'regular':
+        elif self.fingerholes == 'regular':
             a = self.h/4
             if a < 35:
                 return a
             else:
                 return 35
-        elif self.fingerhole == 'deep':
+        elif self.fingerholes == 'deep':
             return self.h-self.thickness-10
-        elif self.fingerhole == 'none':
+        elif self.fingerholes == 'none':
             return 0
 
     def xSlots(self):
@@ -197,7 +197,7 @@ class TypeTray(_TopEdge):
 
             # Generate text
             self.text(
-                "%s" % self.textcontent[self.textnumber],
+                f"{self.textcontent[self.textnumber]}",
                 textx,
                 texty,
                 0,
@@ -241,7 +241,7 @@ class TypeTray(_TopEdge):
 
         self.textcontent = []
         if hasattr(self, "label_text"):
-            self.textcontent = self.label_text.split("\r\n")
+            self.textcontent = self.label_text.splitlines()
         else:
             if self.label_file:
                 with Path(self.label_file).open() as f:
@@ -261,10 +261,10 @@ class TypeTray(_TopEdge):
 
         # front
         if self.text_at_front:
-            frontCBs = [lambda:(self.textCB(), self.mirrorX(self.xHoles, x)()),
+            frontCBs = [lambda:(self.textCB(), self.xHoles()),
                         None, self.gripHole]
         else:
-            frontCBs = [self.mirrorX(self.xHoles, x), None, self.gripHole]
+            frontCBs = [self.xHoles, None, self.gripHole]
 
         # finger holes at front wall
         if not self.closedtop and \
@@ -306,18 +306,18 @@ class TypeTray(_TopEdge):
         # finger holes at back wall
         if not self.closedtop and \
            self.fingerholes in ("back", "front-and-back"):
-            tb = edges.SlottedEdge(self, self.sx, "A")
+            tb = edges.SlottedEdge(self, self.sx[::-1], "A")
 
         if bh:
             self.rectangularWall(x, h+bh, [b, "f", tb, "f"],
                                  callback=[self.xHoles],
                                  ignore_widths=[],
-                                 move="up", label="back")
+                                 move="mirror up", label="back")
         else:
             self.rectangularWall(x, h, [b, "F", tb, "F"],
                                  callback=[self.xHoles],
                                  ignore_widths=ignore_widths,
-                                 move="up", label="back")
+                                 move="mirror up", label="back")
 
         # top / lid
         if self.closedtop and sameh:
