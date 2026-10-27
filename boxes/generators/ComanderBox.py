@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import math
+from cmath import sqrt
 from functools import partial
 
 from boxes import Boxes, edges, boolarg, lids
@@ -68,11 +69,13 @@ BetaVersion
         facing_wall_length = sum(self.sx) + self.get_side_thickness() * (len(self.sx) - 1)
         bottom_edge = ("F")
         upper_edge = ("e")
+
         for i in range(2):
             for _ in range(2):
+                ratioTmp = (self.ratio_front if i else self.ratio_back)
                 self.rectangularWall(
                     facing_wall_length,
-                    self.h * (self.ratio_front if not _ else 1-self.ratio_front),
+                    self.h * (ratioTmp if not _ else 1-ratioTmp),
                     [
                         bottom_edge if (not _) else upper_edge,
                         "F",
@@ -84,21 +87,19 @@ BetaVersion
                 )
         # Side walls
         side_wall_length = self.y
+
+        #calcul de la longueur de la coupure de ratio
+        tmp=math.sqrt((self.h*self.ratio_back-self.h*self.ratio_front)**2+self.y**2)
+        # on calcul maintenant l'angle en utilisant les règle du cosinus. adjacent/hypotenus = cos(angle)
+        angle = math.degrees(math.acos((self.h*self.ratio_back-self.h*self.ratio_front) / tmp))
         for i in range(2):
-            for _ in range(2):
-                self.rectangularWall(
-                    side_wall_length,
-                    self.h * (self.ratio_front if _ else 1-self.ratio_front),
-                    [
-                        bottom_edge if (not _) else upper_edge,
-                        "f",
-                        bottom_edge if _ else upper_edge,
-                        "f"
-                    ],
-                    move="up", label=("bottom" if _ else "upper")+" "+("right" if i else "left"),
-                )
-
-
+            # ordre des coté, construit dans le sens trigonometrique.
+            borders = [self.y, 90,self.thickness*(1+self.FingerJoint_extra_length),0, self.h*self.ratio_back, 180-angle, tmp, angle, self.h*self.ratio_front, 0,self.thickness*(1+self.FingerJoint_extra_length),90]
+            self.polygonWall(borders, move="right", edge="Fefefe", label="bottom "+("right" if i else "left"))
+        for i in range(2):
+            # ordre des coté, construit dans le sens trigonometrique.
+            borders = [self.y, 90,self.thickness*(1+self.FingerJoint_extra_length),0,self.h-self.h*self.ratio_front, 180-angle, tmp, angle, self.h-self.h*self.ratio_back ,0,self.thickness*(1+self.FingerJoint_extra_length),90]
+            self.polygonWall(borders, move="right", edge="Fefefe", label="upper "+("right" if i else "left"))
         self.lid(facing_wall_length, side_wall_length)
 
         # Switch to right side of the file
@@ -133,7 +134,7 @@ BetaVersion
         for _ in range(side_walls_number-1):
             hauteur = self.h * self.ratio_front
             self.rectangularWall(
-                side_wall_length, hauteur, ["f","f", "e", "f"], move="up", label="centralpiece " + str(_ + 1)
+                side_wall_length, hauteur, ["f","f", "e", "f"], move="right", label="centralpiece " + str(_ + 1)
             )
 
         if self.debug:
