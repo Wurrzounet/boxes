@@ -160,6 +160,7 @@ BetaVersion
         for x in self.sx[:-1]:
             posx += x
             self.fingerHolesAt(posx, 0, length)
+            posx +=self.get_side_thickness()
 
 class Memoizer(dict):
     def __init__(self, computation) -> None:
