@@ -38,10 +38,16 @@ BetaVersion
 
 
         self.argparser.add_argument(
-            "--ratio",
+            "--ratio_front",
             type=float,
             default=0.6,
-            help="ratio for the bottom part (in proportion of the height)",
+            help="ratio for the bottom part in the front (in proportion of the height)",
+        )
+        self.argparser.add_argument(
+            "--ratio_back",
+            type=float,
+            default=0.6,
+            help="ratio for the bottom part  in the back (in proportion of the height)",
         )
 
     def render(self):
@@ -59,21 +65,21 @@ BetaVersion
         self.ctx.save()
 
         # Facing walls (outer) with finger holes to support side walls
-        facing_wall_length = sum(self.sx) + self.get_side_thickness() * (len(self.sx) + 1)#+self.thickness*2
+        facing_wall_length = sum(self.sx) + self.get_side_thickness() * (len(self.sx) - 1)
         bottom_edge = ("F")
         upper_edge = ("e")
         for i in range(2):
             for _ in range(2):
                 self.rectangularWall(
                     facing_wall_length,
-                    self.h * (self.ratio if not _ else 1-self.ratio),
+                    self.h * (self.ratio_front if not _ else 1-self.ratio_front),
                     [
                         bottom_edge if (not _) else upper_edge,
                         "F",
                         bottom_edge if _ else upper_edge,
                         "F",
                     ],
-                    callback=([partial(self.generate_finger_holes, self.h * self.ratio)] if not _ else None),
+                    callback=([partial(self.generate_finger_holes, self.h * self.ratio_front)] if not _ else None),
                     move="up", label=("bottom" if not _ else "upper")+" "+("Front" if i else "Back"),
                 )
         # Side walls
@@ -82,7 +88,7 @@ BetaVersion
             for _ in range(2):
                 self.rectangularWall(
                     side_wall_length,
-                    self.h * (self.ratio if _ else 1-self.ratio),
+                    self.h * (self.ratio_front if _ else 1-self.ratio_front),
                     [
                         bottom_edge if (not _) else upper_edge,
                         "f",
@@ -125,7 +131,7 @@ BetaVersion
             move="up", label="UP",
         )
         for _ in range(side_walls_number-1):
-            hauteur = self.h * self.ratio
+            hauteur = self.h * self.ratio_front
             self.rectangularWall(
                 side_wall_length, hauteur, ["f","f", "e", "f"], move="up", label="centralpiece " + str(_ + 1)
             )
@@ -152,13 +158,8 @@ BetaVersion
     def generate_finger_holes(self, length):
         posx = self.get_side_thickness()*0.5
         for x in self.sx[:-1]:
-            posx += x + self.get_side_thickness()
+            posx += x
             self.fingerHolesAt(posx, 0, length)
-
-
-
-
-
 
 class Memoizer(dict):
     def __init__(self, computation) -> None:
@@ -167,7 +168,3 @@ class Memoizer(dict):
     def __missing__(self, key):
         res = self[key] = self.computation(key)
         return res
-
-
-
-
