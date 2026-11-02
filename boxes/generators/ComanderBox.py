@@ -33,7 +33,7 @@ BetaVersion
 
     def __init__(self) -> None:
         Boxes.__init__(self)
-        self.addSettingsArgs(edges.FingerJointSettings, extra_length=0.2)
+        self.addSettingsArgs(edges.FingerJointSettings, extra_length=0.0)
 
         self.buildArgParser(h=104, outside=False, sx="70*1", y="60")  # , thickness=0.5)
 
@@ -47,8 +47,14 @@ BetaVersion
         self.argparser.add_argument(
             "--ratio_back",
             type=float,
-            default=0.6,
+            default=0.7,
             help="ratio for the bottom part  in the back (in proportion of the height)",
+        )
+        self.argparser.add_argument(
+            "--height_drawer",
+            type=float,
+            default=25,
+            help="Height of the bottom drawer (in mm)",
         )
 
     def render(self):
@@ -71,20 +77,34 @@ BetaVersion
         upper_edge = ("e")
 
         for i in range(2):
-            for _ in range(2):
-                ratioTmp = (self.ratio_front if i else self.ratio_back)
-                self.rectangularWall(
-                    facing_wall_length,
-                    self.h * (ratioTmp if not _ else 1-ratioTmp),
-                    [
-                        bottom_edge if (not _) else upper_edge,
-                        "F",
-                        bottom_edge if _ else upper_edge,
-                        "F",
-                    ],
-                    callback=([partial(self.generate_finger_holes, self.h * self.ratio_front)] if not _ else None),
-                    move="up", label=("bottom" if not _ else "upper")+" "+("Front" if i else "Back"),
-                )
+            ratioTmp = 1-(self.ratio_front if i else self.ratio_back)
+            self.rectangularWall(
+                facing_wall_length,
+                self.h * ratioTmp,
+                [
+                    upper_edge,
+                    "F",
+                    upper_edge,
+                    "F",
+                ],
+                #callback=([partial(self.generate_finger_holes, self.h * self.ratio_front)] if not _ else None),
+                move="up", label=("upper")+" "+("Front" if i else "Back"),
+            )
+
+        for i in range(2):
+            tmp_height = self.h *(self.ratio_front if i else self.ratio_back)
+            self.rectangularWall(
+                facing_wall_length,
+                tmp_height,
+                [
+                    bottom_edge,
+                    "F",
+                    bottom_edge,
+                    "F",
+                ],
+                #callback=([partial(self.generate_finger_holes, self.h * self.ratio_front)] if not _ else None),
+                move="up", label=("bottom")+" "+("Front" if i else "Back"),
+            )
         # Side walls
         side_wall_length = self.y
 
@@ -137,6 +157,13 @@ BetaVersion
                 side_wall_length, hauteur, ["f","f", "e", "f"], move="right", label="centralpiece " + str(_ + 1)
             )
 
+
+        self.rectangularWall(self.get_depth_drawer(),self.get_height_drawer(), "FFeF", move="right", label="left drawer")
+        self.rectangularWall(self.get_depth_drawer(), self.get_height_drawer(), "FFeF", move="right", label="right drawer")
+        self.rectangularWall(self.get_length_drawer(),  self.get_height_drawer(), "Ffef",  move="right", label="back drawer")
+        self.rectangularWall(self.get_length_drawer(), self.get_height_drawer(), "Ffef", move="up", label="back drawer")
+        self.rectangularWall(self.get_depth_drawer(), self.get_length_drawer(), "ffff", label="bottom Drawer")
+
         if self.debug:
             debug_info = ["Debug"]
 
@@ -155,6 +182,12 @@ BetaVersion
 
     def get_side_thickness(self):
         return self.thickness
+    def get_height_drawer(self):
+        return self.height_drawer
+    def get_depth_drawer(self):
+        return self.y-self.thickness*2
+    def get_length_drawer(self):
+        return sum(self.sx)-self.thickness*2.1
 
     def generate_finger_holes(self, length):
         posx = self.get_side_thickness()*0.5
