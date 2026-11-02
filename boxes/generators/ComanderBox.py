@@ -73,8 +73,7 @@ BetaVersion
 
         # Facing walls (outer) with finger holes to support side walls
         facing_wall_length = sum(self.sx) + self.get_side_thickness() * (len(self.sx) - 1)
-        bottom_edge = ("F")
-        upper_edge = ("e")
+
 
         for i in range(2):
             ratioTmp = 1-(self.ratio_front if i else self.ratio_back)
@@ -82,9 +81,9 @@ BetaVersion
                 facing_wall_length,
                 self.h * ratioTmp,
                 [
-                    upper_edge,
+                    "e",
                     "F",
-                    upper_edge,
+                    "F",
                     "F",
                 ],
                 #callback=([partial(self.generate_finger_holes, self.h * self.ratio_front)] if not _ else None),
@@ -92,18 +91,18 @@ BetaVersion
             )
 
         for i in range(2):
-            tmp_height = self.h *(self.ratio_front if i else self.ratio_back)
+            tmp_height = self.h *(self.ratio_front if i else self.ratio_back)+self.height_drawer+self.thickness
             self.rectangularWall(
                 facing_wall_length,
-                tmp_height,
+                self.get_height_bottom_front() if i else self.get_height_bottom_back(),
                 [
-                    bottom_edge,
                     "F",
-                    bottom_edge,
+                    "F",
+                    "e",
                     "F",
                 ],
                 #callback=([partial(self.generate_finger_holes, self.h * self.ratio_front)] if not _ else None),
-                move="up", label=("bottom")+" "+("Front" if i else "Back"),
+                move="up", label=("bottom")+" "+("Front" if i else "Back"),callback=[self.divider_front]
             )
         # Side walls
         side_wall_length = self.y
@@ -114,8 +113,8 @@ BetaVersion
         angle = math.degrees(math.acos((self.h*self.ratio_back-self.h*self.ratio_front) / tmp))
         for i in range(2):
             # ordre des coté, construit dans le sens trigonometrique.
-            borders = [self.y, 90,self.thickness*(1+self.FingerJoint_extra_length),0, self.h*self.ratio_back, 180-angle, tmp, angle, self.h*self.ratio_front, 0,self.thickness*(1+self.FingerJoint_extra_length),90]
-            self.polygonWall(borders, move="right", edge="Fefefe", label="bottom "+("right" if i else "left"))
+            borders = [self.y, 90,self.thickness*(1+self.FingerJoint_extra_length),0, self.get_height_bottom_back(), 180-angle, tmp, angle,  self.get_height_bottom_front() , 0,self.thickness*(1+self.FingerJoint_extra_length),90]
+            self.polygonWall(borders, move="right", edge="Fefefe", label="bottom "+("right" if i else "left"),callback=[self.divider_side])
         for i in range(2):
             # ordre des coté, construit dans le sens trigonometrique.
             borders = [self.y, 90,self.thickness*(1+self.FingerJoint_extra_length),0,self.h-self.h*self.ratio_front, 180-angle, tmp, angle, self.h-self.h*self.ratio_back ,0,self.thickness*(1+self.FingerJoint_extra_length),90]
@@ -137,7 +136,6 @@ BetaVersion
                 "f",
                 "f",
             ],
-            callback=[partial(self.generate_finger_holes, side_wall_length)],
             move="up", label="Bottom",
         )
         self.rectangularWall(
@@ -150,6 +148,18 @@ BetaVersion
                 "f",
             ],
             move="up", label="UP",
+        )
+
+        self.rectangularWall(
+            facing_wall_length,
+            side_wall_length,
+            [
+                "f",
+                "f",
+                "f",
+                "f",
+            ],
+            move="up", label="MIDDLE",
         )
         for _ in range(side_walls_number-1):
             hauteur = self.h * self.ratio_front
@@ -188,6 +198,22 @@ BetaVersion
         return self.y-self.thickness*2
     def get_length_drawer(self):
         return sum(self.sx)-self.thickness*2.1
+
+    def get_height_bottom_front(self):
+        return self.h * self.ratio_front + self.height_drawer + self.thickness
+
+    def get_height_bottom_back(self):
+        return self.h * self.ratio_back + self.height_drawer + self.thickness
+
+    def divider_side(self):
+        t = self.thickness
+        y = self.height_drawer+self.thickness*2.5
+        self.fingerHolesAt(0, y, self.y, 0)
+
+    def divider_front(self):
+        t = self.thickness
+        y = self.height_drawer+self.thickness*1.5
+        self.fingerHolesAt(0, y, sum(self.sx), 0)
 
     def generate_finger_holes(self, length):
         posx = self.get_side_thickness()*0.5
